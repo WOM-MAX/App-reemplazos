@@ -6,9 +6,9 @@ spring:
     name: reemplazos-acropolis
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/reemplazos_db}
-    username: ${SPRING_DATASOURCE_USERNAME:acropolis_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:Acr0p0l1s_S3cur3_2026!}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/reemplazos_db?sslmode=require}
+    username: ${DB_USERNAME:acropolis_user}
+    password: ${DB_PASSWORD:Acr0p0l1s_S3cur3_2026!}
     driver-class-name: org.postgresql.Driver
 
   jpa:

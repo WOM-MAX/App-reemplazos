@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Dashboard — Reemplazos Colegio Acrópolis</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f1729",
+                        "accent-orange": "#f97316",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-nav {
+            background-color: #f97316;
+            color: white !important;
+        }
+
+        .kpi-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light font-display">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-primary flex flex-col shrink-0">
+            <div class="p-6 flex items-center gap-3">
+                <div
+                    class="h-10 w-10 bg-accent-orange rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    A</div>
+                <div>
+                    <h1 class="text-white text-lg font-bold leading-none">Acrópolis</h1>
+                    <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Institución Educativa</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 mt-6 space-y-2">
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 rounded-xl active-nav transition-all duration-200"
+                    href="index.html">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="formulario.html">
+                    <span class="material-symbols-outlined">add_circle</span>
+                    <span class="font-medium">Nuevo Reemplazo</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="personal.html">
+                    <span class="material-symbols-outlined">group</span>
+                    <span class="font-medium">Personal</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="reportes.html">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="font-medium">Reportes</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="atrasos.html">
+                    <span class="material-symbols-outlined">schedule</span>
+                    <span class="font-medium">Atrasos</span>
+                </a>
+                <a id="nav-usuarios"
+                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="usuarios.html">
+                    <span class="material-symbols-outlined">manage_accounts</span>
+                    <span class="font-medium">Usuarios</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <form id="logout-form" action="/api/auth/logout" method="POST">
+                    <button type="submit"
+                        class="flex items-center gap-3 px-4 py-3 text-slate-400 cursor-pointer hover:text-white transition-colors w-full">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="font-medium">Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tight">Vista General</h2>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3 text-slate-400">search</span>
+                        <input
+                            class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-accent-orange w-64"
+                            placeholder="Buscar..." type="text" />
+                    </div>
+                    <div class="flex items-center gap-3 border-l border-slate-200 pl-6">
+                        <div class="relative cursor-pointer">
+                            <span class="material-symbols-outlined text-slate-600">notifications</span>
+                            <span
+                                class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                        </div>
+                        <span id="header-username" class="text-sm font-medium text-slate-600"></span>
+                        <div id="header-avatar"
+                            class="h-10 w-10 rounded-full bg-accent-orange/20 flex items-center justify-center text-accent-orange font-bold">
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Content Area -->
+            <div class="p-8 space-y-8 bg-slate-50 min-h-full">
+                <!-- KPI Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- KPI 1: Reemplazos del Mes -->
+                    <div
+                        class="kpi-card bg-white p-6 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden animate-in">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-slate-500 text-sm font-medium">Reemplazos del Mes</p>
+                            <h3 id="kpi-minutos" class="text-2xl font-bold text-slate-900">—</h3>
+                            <div class="flex items-center gap-1 mt-2 text-green-600 font-semibold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                <span id="kpi-reemplazos-count">—</span>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+                            <span class="material-symbols-outlined text-3xl">history</span>
+                        </div>
+                    </div>
+                    <!-- KPI 2: Total Personal -->
+                    <div class="kpi-card bg-white p-6 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden animate-in"
+                        style="animation-delay: 0.1s">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-slate-500 text-sm font-medium">Total Personal</p>
+                            <h3 id="kpi-personal" class="text-2xl font-bold text-slate-900">—</h3>
+                            <div class="flex items-center gap-1 mt-2 text-slate-400 font-semibold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">group</span>
+                                <span>Funcionarios</span>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+                            <span class="material-symbols-outlined text-3xl">badge</span>
+                        </div>
+                    </div>
+                    <!-- KPI 3: Total Minutos Favor -->
+                    <div class="kpi-card bg-white p-6 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden animate-in"
+                        style="animation-delay: 0.2s">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-slate-500 text-sm font-medium">Total Min. a Favor</p>
+                            <h3 id="kpi-favor" class="text-2xl font-bold text-green-600">—</h3>
+                            <div class="flex items-center gap-1 mt-2 text-green-600 font-semibold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">trending_up</span>
+                                <span>Acumulado mes</span>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+                            <span class="material-symbols-outlined text-3xl">payments</span>
+                        </div>
+                    </div>
+                    <!-- KPI 4: Total Minutos Deuda -->
+                    <div class="kpi-card bg-white p-6 rounded-xl shadow-sm border border-slate-100 relative overflow-hidden animate-in"
+                        style="animation-delay: 0.3s">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-slate-500 text-sm font-medium">Total Min. Deuda</p>
+                            <h3 id="kpi-deuda" class="text-2xl font-bold text-red-600">—</h3>
+                            <div class="flex items-center gap-1 mt-2 text-red-600 font-semibold text-xs">
+                                <span class="material-symbols-outlined text-[16px]">trending_down</span>
+                                <span>Acumulado mes</span>
+                            </div>
+                        </div>
+                        <div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+                            <span class="material-symbols-outlined text-3xl">money_off</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Central Content -->
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Chart Section -->
+                    <div class="lg:w-[60%] bg-white p-8 rounded-xl shadow-xl border border-slate-100">
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900">Ausencias vs Reemplazos</h4>
+                                <p class="text-slate-400 text-sm">Registro de los últimos 7 días lectivos</p>
+                            </div>
+                            <div class="flex items-center gap-4 text-xs">
+                                <div class="flex items-center gap-1"><span class="h-3 w-3 bg-primary rounded"></span>
+                                    Ausencias</div>
+                                <div class="flex items-center gap-1"><span
+                                        class="h-3 w-3 bg-accent-orange rounded"></span> Reemplazos</div>
+                            </div>
+                        </div>
+                        <div id="chart-container" class="relative h-[300px] flex items-end justify-between gap-4 px-2">
+                            <!-- Chart bars populated by JS -->
+                        </div>
+                    </div>
+                    <!-- Recent Activity -->
+                    <div class="lg:w-[40%] bg-white p-8 rounded-xl shadow-xl border border-slate-100">
+                        <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-lg font-bold text-slate-900">Actividad Reciente</h4>
+                            <a href="reportes.html"
+                                class="text-accent-orange text-xs font-bold uppercase hover:underline">Ver Todo</a>
+                        </div>
+                        <div id="activity-feed" class="space-y-6">
+                            <div class="flex items-center justify-center h-32 text-slate-400">
+                                <span class="material-symbols-outlined mr-2">hourglass_empty</span> Cargando...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer Stats -->
+                <div
+                    class="bg-primary rounded-xl p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h4 class="text-xl font-bold">Estado del Personal</h4>
+                        <p class="text-slate-400 text-sm mt-1" id="footer-info">Cargando información...</p>
+                    </div>
+                    <div class="flex items-center gap-8">
+                        <div class="text-center">
+                            <p class="text-xs text-slate-400 uppercase tracking-widest">Total</p>
+                            <p id="footer-total" class="text-2xl font-bold">—</p>
+                        </div>
+                        <div class="text-center border-l border-slate-700 pl-8">
+                            <a href="formulario.html"
+                                class="bg-accent-orange px-6 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all inline-block">+
+                                Nuevo Reemplazo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Edit Modal -->
+            <div id="edit-modal"
+                class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+                    <div class="bg-primary p-6 text-white">
+                        <h3 class="text-lg font-bold flex items-center gap-2"><span
+                                class="material-symbols-outlined">edit_note</span> Modificar Reemplazo</h3>
+                    </div>
+                    <form id="edit-form" class="p-6 space-y-4">
+                        <input type="hidden" id="edit-id" />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Docente Ausente</label>
+                                <select id="edit-ausente"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    required></select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Reemplazante</label>
+                                <select id="edit-reemplazante"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    required></select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Fecha</label>
+                                <input id="edit-fecha" type="date"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    required />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Hora</label>
+                                <input id="edit-hora" type="time"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Minutos</label>
+                                <input id="edit-minutos" type="number" min="1"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center"
+                                    required />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Curso</label>
+                                <input id="edit-curso" type="text"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    placeholder="Ej: 3°A" />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase">Asignatura</label>
+                                <input id="edit-asignatura" type="text"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    placeholder="Ej: Matemática" />
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit"
+                                class="flex-1 h-12 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-lg">save</span> Guardar Cambios
+                            </button>
+                            <button type="button" onclick="closeEditModal()"
+                                class="flex-1 h-12 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API = '';
+
+        async function loadDashboard() {
+            try {
+                const [statsRes, recentRes] = await Promise.all([
+                    fetch(`${API}/api/dashboard/stats`),
+                    fetch(`${API}/api/reemplazos/recientes`)
+                ]);
+                const stats = await statsRes.json();
+                const recent = await recentRes.json();
+
+                // KPIs
+                document.getElementById('kpi-minutos').textContent = (stats.totalMinutosMes || 0).toLocaleString('es-CL') + ' min';
+                document.getElementById('kpi-reemplazos-count').textContent = (stats.totalReemplazosMes || 0) + ' registros';
+                document.getElementById('kpi-personal').textContent = stats.totalPersonal || 0;
+                document.getElementById('kpi-favor').textContent = (stats.totalMinutosFavor || 0).toLocaleString('es-CL') + ' min';
+                document.getElementById('kpi-deuda').textContent = (stats.totalMinutosDeuda || 0).toLocaleString('es-CL') + ' min';
+
+                // Footer
+                document.getElementById('footer-info').textContent = `Actualmente hay ${stats.totalPersonal || 0} funcionarios registrados.`;
+                document.getElementById('footer-total').textContent = stats.totalPersonal || 0;
+
+                // Activity Feed
+                renderActivityFeed(recent);
+
+                // Chart (static illustration since we don't have daily data endpoint)
+                renderChart();
+            } catch (err) {
+                console.error('Error loading dashboard:', err);
+            }
+        }
+
+        let reemplazosCache = [];
+
+        function renderActivityFeed(reemplazos) {
+            reemplazosCache = reemplazos || [];
+            const feed = document.getElementById('activity-feed');
+            if (!reemplazos || reemplazos.length === 0) {
+                feed.innerHTML = `<div class="flex items-center justify-center h-32 text-slate-400">
+            <span class="material-symbols-outlined mr-2">inbox</span> Sin actividad reciente
+        </div>`;
+                return;
+            }
+
+            feed.innerHTML = reemplazos.slice(0, 5).map((r, i) => {
+                const icons = ['check_circle', 'swap_horiz', 'schedule', 'assignment', 'person'];
+                const colors = ['green', 'blue', 'amber', 'indigo', 'purple'];
+                const c = colors[i % colors.length];
+                const icon = icons[i % icons.length];
+                return `
+        <div class="flex gap-4 animate-in" style="animation-delay: ${i * 0.1}s">
+            <div class="h-10 w-10 bg-${c}-100 text-${c}-600 rounded-lg flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined">${icon}</span>
+            </div>
+            <div class="flex-1 flex flex-col">
+                <p class="text-sm font-semibold text-slate-900">${r.reemplazante?.apellidos || ''} ${r.reemplazante?.nombre || ''}
+                    <span class="text-slate-400 font-normal">cubrió a</span> ${r.docenteAusente?.apellidos || ''} ${r.docenteAusente?.nombre || ''}</p>
+                <p class="text-xs text-slate-400">${r.asignatura || ''} ${r.curso ? '— ' + r.curso : ''} · ${r.minutosReemplazo} min</p>
+                <span class="text-[10px] mt-1 text-slate-500 font-medium">${r.fecha || ''} ${r.horaInicio || ''}</span>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+                <button onclick="openEditModal(${r.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                    <span class="material-symbols-outlined text-lg">edit</span>
+                </button>
+                <button onclick="deleteReemplazo(${r.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+            </div>
+        </div>`;
+            }).join('');
+        }
+
+        function renderChart() {
+            const container = document.getElementById('chart-container');
+            const days = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
+            const ausencias = [160, 180, 120, 200, 150, 40, 20];
+            const reemplazos = [140, 170, 120, 190, 140, 40, 20];
+            const maxH = 200;
+
+            container.innerHTML = days.map((day, i) => {
+                const h1 = ausencias[i];
+                const h2 = reemplazos[i];
+                return `
+        <div class="flex flex-col items-center gap-2 flex-1 group">
+            <div class="w-full flex justify-center items-end gap-1 h-[200px]">
+                <div class="w-full bg-primary/20 rounded-t-md transition-all duration-500" style="height: ${h1}px"></div>
+                <div class="w-full bg-accent-orange rounded-t-md transition-all duration-500" style="height: ${h2}px"></div>
+            </div>
+            <span class="text-xs font-bold text-slate-500">${day}</span>
+        </div>`;
+            }).join('');
+        }
+
+        /* ── Edit & Delete ── */
+        let personalList = [];
+
+        async function loadPersonalForEdit() {
+            if (personalList.length > 0) return;
+            try {
+                const res = await fetch(`${API}/api/personal`);
+                personalList = await res.json();
+            } catch (e) { console.error(e); }
+        }
+
+        async function openEditModal(id) {
+            const r = reemplazosCache.find(x => x.id === id);
+            if (!r) return;
+            await loadPersonalForEdit();
+
+            const selAusente = document.getElementById('edit-ausente');
+            const selReemp = document.getElementById('edit-reemplazante');
+            selAusente.innerHTML = personalList.map(p =>
+                `<option value="${p.id}" ${p.id === r.docenteAusente?.id ? 'selected' : ''}>${p.apellidos.toUpperCase()} ${p.nombre.toUpperCase()}</option>`
+            ).join('');
+            selReemp.innerHTML = personalList.map(p =>
+                `<option value="${p.id}" ${p.id === r.reemplazante?.id ? 'selected' : ''}>${p.apellidos.toUpperCase()} ${p.nombre.toUpperCase()}</option>`
+            ).join('');
+
+            document.getElementById('edit-id').value = r.id;
+            document.getElementById('edit-fecha').value = r.fecha || '';
+            document.getElementById('edit-hora').value = r.horaInicio || '';
+            document.getElementById('edit-curso').value = r.curso || '';
+            document.getElementById('edit-asignatura').value = r.asignatura || '';
+            document.getElementById('edit-minutos').value = r.minutosReemplazo || 45;
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.getElementById('edit-modal').classList.remove('flex');
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const payload = {
+                docenteAusenteId: parseInt(document.getElementById('edit-ausente').value),
+                reemplazanteId: parseInt(document.getElementById('edit-reemplazante').value),
+                fecha: document.getElementById('edit-fecha').value,
+                horaInicio: document.getElementById('edit-hora').value || null,
+                curso: document.getElementById('edit-curso').value || null,
+                asignatura: document.getElementById('edit-asignatura').value || null,
+                minutosReemplazo: parseInt(document.getElementById('edit-minutos').value)
+            };
+            try {
+                const res = await fetch(`${API}/api/reemplazos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeEditModal();
+                    Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'El reemplazo fue modificado.', confirmButtonColor: '#f97316', timer: 2000 });
+                    loadDashboard();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar.' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.' });
+            }
+        });
+
+        async function deleteReemplazo(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar reemplazo?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const res = await fetch(`${API}/api/reemplazos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El reemplazo fue eliminado.', confirmButtonColor: '#f97316', timer: 2000 });
+                    loadDashboard();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar.' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar.' });
+            }
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('edit-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeEditModal();
+        });
+
+        // Auth: load user info
+        async function initAuth() {
+            try {
+                const res = await fetch('/api/auth/me');
+                if (res.ok) {
+                    const user = await res.json();
+                    const avatar = document.getElementById('header-avatar');
+                    const uname = document.getElementById('header-username');
+                    if (avatar) avatar.textContent = (user.username || 'U')[0].toUpperCase();
+                    if (uname) uname.textContent = user.username || '';
+                    if (user.rol === 'ADMIN') {
+                        const navU = document.getElementById('nav-usuarios');
+                        if (navU) navU.classList.replace('hidden', 'flex');
+                    }
+                }
+            } catch (e) { console.error('Auth error:', e); }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { loadDashboard(); initAuth(); });
+    </script>
+</body>
+
+</html>
