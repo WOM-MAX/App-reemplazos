@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Gestión de Personal — Colegio Acrópolis</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#0f1729", "accent-orange": "#f97316", "background-light": "#f6f7f8" },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-nav {
+            background-color: #f97316;
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light font-display">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-primary flex flex-col shrink-0">
+            <div class="p-6 flex items-center gap-3">
+                <div
+                    class="h-10 w-10 bg-accent-orange rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    A</div>
+                <div>
+                    <h1 class="text-white text-lg font-bold leading-none">Acrópolis</h1>
+                    <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Institución Educativa</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 mt-6 space-y-2">
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="index.html">
+                    <span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="formulario.html">
+                    <span class="material-symbols-outlined">add_circle</span><span class="font-medium">Nuevo
+                        Reemplazo</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 rounded-xl active-nav transition-all duration-200"
+                    href="personal.html">
+                    <span class="material-symbols-outlined">group</span><span class="font-medium">Personal</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="reportes.html">
+                    <span class="material-symbols-outlined">analytics</span><span class="font-medium">Reportes</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="atrasos.html">
+                    <span class="material-symbols-outlined">schedule</span><span class="font-medium">Atrasos</span>
+                </a>
+                <a id="nav-usuarios"
+                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="usuarios.html">
+                    <span class="material-symbols-outlined">manage_accounts</span><span
+                        class="font-medium">Usuarios</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <form action="/api/auth/logout" method="POST">
+                    <button type="submit"
+                        class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors w-full">
+                        <span class="material-symbols-outlined">logout</span><span class="font-medium">Cerrar
+                            Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+        <!-- Main -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+                <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tight">Gestión de Personal</h2>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <span
+                                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            <input id="search-input"
+                                class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-sm focus:ring-2 focus:ring-accent-orange w-64"
+                                placeholder="Buscar por nombre..." type="text" />
+                        </div>
+                        <button onclick="openExcelModal()"
+                            class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">upload_file</span> Importar Excel
+                        </button>
+                        <button onclick="openAddModal()"
+                            class="bg-accent-orange text-white px-4 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">person_add</span> Agregar
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-3 border-l border-slate-200 pl-6">
+                        <div class="relative cursor-pointer">
+                            <span class="material-symbols-outlined text-slate-600">notifications</span>
+                            <span
+                                class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                        </div>
+                        <span id="header-username" class="text-sm font-medium text-slate-600"></span>
+                        <div id="header-avatar"
+                            class="h-10 w-10 rounded-full bg-accent-orange/20 flex items-center justify-center text-accent-orange font-bold">
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="p-8 bg-slate-50 min-h-full">
+                <div class="bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">Personal Institucional</h3>
+                            <p class="text-slate-400 text-sm" id="results-count">Cargando...</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200">
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">RUN</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Apellidos
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Nombre
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Cargo
+                                    </th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase">Email
+                                    </th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase">Min.
+                                        Contrato</th>
+                                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase">
+                                        Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="personal-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Editar/Agregar -->
+    <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-8">
+            <h3 id="modal-title" class="text-xl font-bold text-primary mb-6">Agregar Personal</h3>
+            <form id="personal-form" class="space-y-4">
+                <input type="hidden" id="edit-id" />
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-xs font-bold text-slate-500 uppercase">RUN</label>
+                        <input id="edit-run"
+                            class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" required />
+                    </div>
+                    <div><label class="text-xs font-bold text-slate-500 uppercase">Cargo</label>
+                        <input id="edit-cargo"
+                            class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                            value="Docente" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="text-xs font-bold text-slate-500 uppercase">Nombre</label>
+                        <input id="edit-nombre"
+                            class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" required />
+                    </div>
+                    <div><label class="text-xs font-bold text-slate-500 uppercase">Apellidos</label>
+                        <input id="edit-apellidos"
+                            class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" required />
+                    </div>
+                </div>
+                <div><label class="text-xs font-bold text-slate-500 uppercase">Email Institucional</label>
+                    <input id="edit-email" type="email"
+                        class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
+                </div>
+                <div><label class="text-xs font-bold text-slate-500 uppercase">Minutos Contrato Reemplazo</label>
+                    <input id="edit-minutos" type="number"
+                        class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" value="0" />
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="submit"
+                        class="flex-1 h-12 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all">Guardar</button>
+                    <button type="button" onclick="closeModal()"
+                        class="flex-1 h-12 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition-all">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Importar Excel -->
+    <div id="excel-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-8">
+            <h3 class="text-xl font-bold text-primary mb-2">Importar Personal desde Excel</h3>
+            <p class="text-slate-500 text-sm mb-6">Sube un archivo <strong>.xlsx</strong> con las columnas:<br>
+                <code
+                    class="bg-slate-100 px-2 py-1 rounded text-xs">RUN | NOMBRE | APELLIDOS | CARGO | EMAIL | MINUTOS CONTRATO</code>
+            </p>
+            <div id="drop-zone"
+                class="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition-all duration-200"
+                onclick="document.getElementById('excel-file').click()">
+                <span class="material-symbols-outlined text-5xl text-slate-400 mb-3 block">cloud_upload</span>
+                <p class="text-slate-600 font-medium">Arrastra tu archivo aquí</p>
+                <p class="text-slate-400 text-sm mt-1">o haz clic para seleccionar</p>
+                <p id="file-name" class="text-emerald-600 font-bold mt-3 hidden"></p>
+            </div>
+            <input type="file" id="excel-file" accept=".xlsx,.xls" class="hidden" onchange="onFileSelected(this)" />
+            <div class="flex gap-3 mt-6">
+                <button id="btn-upload" onclick="uploadExcel()" disabled
+                    class="flex-1 h-12 bg-emerald-600 text-white font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">upload</span> Importar
+                </button>
+                <button onclick="closeExcelModal()"
+                    class="flex-1 h-12 bg-slate-200 text-slate-700 font-bold rounded-lg hover:bg-slate-300 transition-all">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = '';
+        let allPersonal = [];
+
+        async function loadPersonal() {
+            const res = await fetch(`${API}/api/personal`);
+            allPersonal = await res.json();
+            renderTable(allPersonal);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('personal-table');
+            document.getElementById('results-count').textContent = `Mostrando ${data.length} resultados`;
+
+            tbody.innerHTML = data.map((p, i) => `
+    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/50'}">
+        <td class="px-6 py-4 text-sm font-mono text-slate-600">${p.run}</td>
+        <td class="px-6 py-4 text-sm font-semibold text-slate-900">${p.apellidos}</td>
+        <td class="px-6 py-4 text-sm text-slate-700">${p.nombre}</td>
+        <td class="px-6 py-4"><span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">${p.cargo || '—'}</span></td>
+        <td class="px-6 py-4 text-sm text-slate-500">${p.emailInstitucional || '—'}</td>
+        <td class="px-6 py-4 text-center text-sm font-bold text-accent-orange">${p.minutosContratoReemplazo}</td>
+        <td class="px-6 py-4 text-center">
+            <button onclick="editPersonal(${p.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Editar">
+                <span class="material-symbols-outlined text-lg">edit</span>
+            </button>
+            <button onclick="deletePersonal(${p.id}, '${p.apellidos} ${p.nombre}')" class="text-red-500 hover:text-red-700" title="Eliminar">
+                <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+        </td>
+    </tr>`).join('');
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-title').textContent = 'Agregar Personal';
+            document.getElementById('personal-form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('edit-minutos').value = 0;
+            document.getElementById('edit-cargo').value = 'Docente';
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function editPersonal(id) {
+            const p = allPersonal.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('modal-title').textContent = 'Editar Personal';
+            document.getElementById('edit-id').value = p.id;
+            document.getElementById('edit-run').value = p.run;
+            document.getElementById('edit-nombre').value = p.nombre;
+            document.getElementById('edit-apellidos').value = p.apellidos;
+            document.getElementById('edit-cargo').value = p.cargo || '';
+            document.getElementById('edit-email').value = p.emailInstitucional || '';
+            document.getElementById('edit-minutos').value = p.minutosContratoReemplazo;
+            document.getElementById('modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        async function deletePersonal(id, nombre) {
+            const result = await Swal.fire({
+                title: '¿Eliminar?', text: `¿Desea eliminar a ${nombre}?`,
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#ef4444', cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+            });
+            if (result.isConfirmed) {
+                await fetch(`${API}/api/personal/${id}`, { method: 'DELETE' });
+                Swal.fire({ icon: 'success', title: 'Eliminado', confirmButtonColor: '#f97316' });
+                loadPersonal();
+            }
+        }
+
+        document.getElementById('personal-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const payload = {
+                run: document.getElementById('edit-run').value,
+                nombre: document.getElementById('edit-nombre').value,
+                apellidos: document.getElementById('edit-apellidos').value,
+                cargo: document.getElementById('edit-cargo').value,
+                emailInstitucional: document.getElementById('edit-email').value,
+                minutosContratoReemplazo: parseInt(document.getElementById('edit-minutos').value) || 0
+            };
+
+            const url = id ? `${API}/api/personal/${id}` : `${API}/api/personal`;
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                closeModal();
+                Swal.fire({ icon: 'success', title: id ? 'Actualizado' : 'Creado', confirmButtonColor: '#f97316' });
+                loadPersonal();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo guardar.' });
+            }
+        });
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            const filtered = allPersonal.filter(p =>
+                p.apellidos.toLowerCase().includes(q) || p.nombre.toLowerCase().includes(q) || p.run.includes(q)
+            );
+            renderTable(filtered);
+        });
+
+        // ===== Excel Import =====
+        function openExcelModal() {
+            document.getElementById('excel-file').value = '';
+            document.getElementById('file-name').classList.add('hidden');
+            document.getElementById('btn-upload').disabled = true;
+            document.getElementById('drop-zone').classList.remove('border-emerald-500', 'bg-emerald-50/30');
+            document.getElementById('excel-modal').classList.remove('hidden');
+        }
+
+        function closeExcelModal() {
+            document.getElementById('excel-modal').classList.add('hidden');
+        }
+
+        function onFileSelected(input) {
+            if (input.files.length > 0) {
+                const name = input.files[0].name;
+                document.getElementById('file-name').textContent = `📄 ${name}`;
+                document.getElementById('file-name').classList.remove('hidden');
+                document.getElementById('btn-upload').disabled = false;
+                document.getElementById('drop-zone').classList.add('border-emerald-500', 'bg-emerald-50/30');
+            }
+        }
+
+        // Drag & Drop
+        const dropZone = document.getElementById('drop-zone');
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => { e.preventDefault(); dropZone.classList.add('border-emerald-500', 'bg-emerald-50/30'); });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => { e.preventDefault(); });
+            });
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && (files[0].name.endsWith('.xlsx') || files[0].name.endsWith('.xls'))) {
+                    document.getElementById('excel-file').files = files;
+                    onFileSelected(document.getElementById('excel-file'));
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Formato inválido', text: 'Solo se aceptan archivos .xlsx o .xls', confirmButtonColor: '#f97316' });
+                }
+            });
+        }
+
+        async function uploadExcel() {
+            const fileInput = document.getElementById('excel-file');
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            document.getElementById('btn-upload').disabled = true;
+            document.getElementById('btn-upload').innerHTML = '<span class="animate-spin material-symbols-outlined">progress_activity</span> Procesando...';
+
+            try {
+                const res = await fetch(`${API}/api/personal/importar-excel`, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.error) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: data.error, confirmButtonColor: '#f97316' });
+                } else {
+                    let msg = `<b>${data.importados}</b> nuevos importados<br><b>${data.actualizados}</b> actualizados`;
+                    if (data.errores > 0) {
+                        msg += `<br><b>${data.errores}</b> errores`;
+                        if (data.detalleErrores) {
+                            msg += '<br><br><small class="text-left block">' + data.detalleErrores.map(e => `⚠️ ${e}`).join('<br>') + '</small>';
+                        }
+                    }
+                    Swal.fire({ icon: 'success', title: 'Importación completada', html: msg, confirmButtonColor: '#f97316' });
+                    closeExcelModal();
+                    loadPersonal();
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar al servidor.', confirmButtonColor: '#f97316' });
+            } finally {
+                document.getElementById('btn-upload').disabled = false;
+                document.getElementById('btn-upload').innerHTML = '<span class="material-symbols-outlined">upload</span> Importar';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPersonal();
+            fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(user => {
+                if (!user) return;
+                const avatar = document.getElementById('header-avatar');
+                const uname = document.getElementById('header-username');
+                if (avatar) avatar.textContent = (user.username || 'U')[0].toUpperCase();
+                if (uname) uname.textContent = user.username || '';
+                if (user.rol === 'ADMIN') {
+                    const nav = document.getElementById('nav-usuarios');
+                    if (nav) nav.classList.replace('hidden', 'flex');
+                }
+            }).catch(() => { });
+        });
+    </script>
+</body>
+
+</html>

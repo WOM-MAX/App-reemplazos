@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f1729",
+                        "accent-orange": "#f97316",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-nav { background-color: #f97316; color: white !important; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 bg-primary dark:bg-slate-950 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="h-10 w-10 bg-accent-orange rounded-lg flex items-center justify-center text-white font-bold text-xl">A</div>
+<div>
+<h1 class="text-white text-lg font-bold leading-none">Acrópolis</h1>
+<p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Institución Educativa</p>
+</div>
+</div>
+<nav class="flex-1 px-4 mt-6 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 rounded-xl active-nav transition-all duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200" href="#">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="font-medium">Nuevo Reemplazo</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Personal</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-medium">Reportes</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-800">
+<div class="flex items-center gap-3 px-4 py-3 text-slate-400">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-medium">Cerrar Sesión</span>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col overflow-y-auto">
+<!-- Header -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tight">Vista General</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-accent-orange w-64" placeholder="Buscar reporte..." type="text"/>
+</div>
+<div class="flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-6">
+<div class="relative cursor-pointer">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+<span class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+</div>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-200" data-alt="User profile avatar of admin" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCvrhQ7F-8Lk0Z2SOVXz6gbXsJTNFultZJvQlXuk7HOl6ba_DkltEVEVBJzxFsquXx7gE5WlZxm_GGCo_VQIPeX5NNPUhti6MJ26OOLj4csP4ixhynHKweYal6k_R_5UX9x3xHBUORo0RtDhzpIQsLWVf5Ypdq2LtL-COWpWBjdChO04jBODx7Pn1kudVbzwdvK47KqWHLge9jyA9s9b0ez8tFr8H1BF6C0Uui7-dPwh_VmhVHjUg9WJj8DQY6dpCmCECewIBni6A'); background-size: cover;"></div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<div class="p-8 space-y-8 bg-slate-50 dark:bg-background-dark min-h-full">
+<!-- KPI Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI 1 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex flex-col gap-1">
+<p class="text-slate-500 text-sm font-medium">Reemplazos del Mes</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">1,240 min</h3>
+<div class="flex items-center gap-1 mt-2 text-green-600 font-semibold text-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+12.5%</span>
+</div>
+</div>
+<div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+<span class="material-symbols-outlined text-3xl">history</span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex flex-col gap-1">
+<p class="text-slate-500 text-sm font-medium">Docentes Ausentes Hoy</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">3</h3>
+<div class="flex items-center gap-1 mt-2 text-slate-400 font-semibold text-xs">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+<span>Igual ayer</span>
+</div>
+</div>
+<div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+<span class="material-symbols-outlined text-3xl">person_off</span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex flex-col gap-1">
+<p class="text-slate-500 text-sm font-medium">Total Bonos a Pagar</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">$450,000</h3>
+<div class="flex items-center gap-1 mt-2 text-red-600 font-semibold text-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+4.2%</span>
+</div>
+</div>
+<div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+<span class="material-symbols-outlined text-3xl">payments</span>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+<div class="flex flex-col gap-1">
+<p class="text-slate-500 text-sm font-medium">Total Descuentos</p>
+<h3 class="text-2xl font-bold text-red-600">$120,000</h3>
+<div class="flex items-center gap-1 mt-2 text-green-600 font-semibold text-xs">
+<span class="material-symbols-outlined text-[16px]">trending_down</span>
+<span>-15.0%</span>
+</div>
+</div>
+<div class="absolute -top-2 -right-2 bg-accent-orange/10 p-4 rounded-full text-accent-orange">
+<span class="material-symbols-outlined text-3xl">money_off</span>
+</div>
+</div>
+</div>
+<!-- Central Content -->
+<div class="flex flex-col lg:flex-row gap-6">
+<!-- Chart Section -->
+<div class="lg:w-[60%] bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="text-lg font-bold text-slate-900 dark:text-slate-100">Ausencias vs Reemplazos</h4>
+<p class="text-slate-400 text-sm">Registro de los últimos 7 días lectivos</p>
+</div>
+<div class="flex items-center gap-4 text-xs">
+<div class="flex items-center gap-1"><span class="h-3 w-3 bg-primary rounded"></span> Ausencias</div>
+<div class="flex items-center gap-1"><span class="h-3 w-3 bg-accent-orange rounded"></span> Reemplazos</div>
+</div>
+</div>
+<div class="relative h-[300px] flex items-end justify-between gap-4 px-2">
+<!-- Visual Bar Representation -->
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[160px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[140px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">LUN</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[180px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[170px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">MAR</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[120px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[120px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">MIE</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[200px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[190px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">JUE</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[150px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[140px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">VIE</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[40px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[40px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">SAB</span>
+</div>
+<div class="flex flex-col items-center gap-2 flex-1 group">
+<div class="w-full flex justify-center items-end gap-1 h-[200px]">
+<div class="w-full bg-primary/20 rounded-t-md h-[20px]"></div>
+<div class="w-full bg-accent-orange rounded-t-md h-[20px]"></div>
+</div>
+<span class="text-xs font-bold text-slate-500">DOM</span>
+</div>
+</div>
+</div>
+<!-- Recent Activity Section -->
+<div class="lg:w-[40%] bg-white dark:bg-slate-900 p-8 rounded-xl shadow-xl border border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between mb-8">
+<h4 class="text-lg font-bold text-slate-900 dark:text-slate-100">Actividad Reciente</h4>
+<button class="text-accent-orange text-xs font-bold uppercase hover:underline">Ver Todo</button>
+</div>
+<div class="space-y-6">
+<!-- Log Entry 1 -->
+<div class="flex gap-4">
+<div class="h-10 w-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Reemplazo finalizado</p>
+<p class="text-xs text-slate-400">Ana Morales cubrió a Carlos Ruiz - Matemáticas 3A</p>
+<span class="text-[10px] mt-1 text-slate-500 font-medium">Hace 10 minutos</span>
+</div>
+</div>
+<!-- Log Entry 2 -->
+<div class="flex gap-4">
+<div class="h-10 w-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">add_task</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Nueva solicitud</p>
+<p class="text-xs text-slate-400">Se requiere reemplazo para Prof. Gómez - 11:30 AM</p>
+<span class="text-[10px] mt-1 text-slate-500 font-medium">Hace 45 minutos</span>
+</div>
+</div>
+<!-- Log Entry 3 -->
+<div class="flex gap-4">
+<div class="h-10 w-10 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Bono asignado</p>
+<p class="text-xs text-slate-400">Bono por reemplazo extendido a Prof. Mendez</p>
+<span class="text-[10px] mt-1 text-slate-500 font-medium">Hace 2 horas</span>
+</div>
+</div>
+<!-- Log Entry 4 -->
+<div class="flex gap-4">
+<div class="h-10 w-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div class="flex flex-col">
+<p class="text-sm font-semibold text-slate-900 dark:text-slate-100">Ausencia sin cubrir</p>
+<p class="text-xs text-slate-400">Biología 2B sin reemplazo asignado para mañana</p>
+<span class="text-[10px] mt-1 text-slate-500 font-medium">Hace 4 horas</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats / Info -->
+<div class="bg-primary dark:bg-slate-950 rounded-xl p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
+<div>
+<h4 class="text-xl font-bold">Estado del Personal</h4>
+<p class="text-slate-400 text-sm mt-1">Actualmente hay 42 docentes en campus.</p>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-center">
+<p class="text-xs text-slate-400 uppercase tracking-widest">En Clase</p>
+<p class="text-2xl font-bold">38</p>
+</div>
+<div class="text-center">
+<p class="text-xs text-slate-400 uppercase tracking-widest">Libres</p>
+<p class="text-2xl font-bold">4</p>
+</div>
+<div class="text-center border-l border-slate-700 pl-8">
+<button class="bg-accent-orange px-6 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all">Exportar PDF</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

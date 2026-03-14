@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app-reemplazos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app-reemplazos
+    ports:
+      - "8096:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-reemplazos:5432/reemplazos_db
+      SPRING_DATASOURCE_USERNAME: acropolis_user
+      SPRING_DATASOURCE_PASSWORD: Acr0p0l1s_S3cur3_2026!
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_USERNAME: "reemplazos@colegioacropolis.cl"
+      SPRING_MAIL_PASSWORD: "sbjxrwcyavhghgsj"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+    depends_on:
+      db-reemplazos:
+        condition: service_healthy
+    networks:
+      - acropolis-cl
+    restart: unless-stopped
+
+  db-reemplazos:
+    image: postgres:15-alpine
+    container_name: db-reemplazos
+    environment:
+      POSTGRES_DB: reemplazos_db
+      POSTGRES_USER: acropolis_user
+      POSTGRES_PASSWORD: Acr0p0l1s_S3cur3_2026!
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    networks:
+      - acropolis-cl
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U acropolis_user -d reemplazos_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  acropolis-cl:
+    driver: bridge

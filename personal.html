@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gestión de Personal - Colegio Acrópolis</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f1729",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 bg-primary text-white flex flex-col h-full">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 rounded-xl bg-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-2xl">school</span>
+</div>
+<div>
+<h1 class="text-lg font-bold leading-none">Colegio Acrópolis</h1>
+<p class="text-xs text-slate-400 mt-1">Administración Escolar</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-medium">Estudiantes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/10 text-white transition-colors" href="#">
+<span class="material-symbols-outlined">badge</span>
+<span class="text-sm font-medium">Personal</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span class="text-sm font-medium">Académico</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="text-sm font-medium">Finanzas</span>
+</a>
+<div class="pt-4 mt-4 border-t border-white/10">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Configuración</span>
+</a>
+</div>
+</nav>
+<div class="p-4 bg-white/5 m-4 rounded-xl">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-slate-700" data-alt="User avatar for profile section" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBe9xuW5ZNWvQfWc08SrHjADmb2ptIbqv4iUDbVLBRST4r1IwsbdeybNIX2g8OQA3y0qtdwcXKpYq4o5aO_iRjzVWFbwWS6PbyZQwA-neAJKO7BFJrO5gG4BjJ5iUcAG15iD35z7gah80_bDtk03LLSThD082NtR5KdVcdXLOdAwjZCMoVqvJ1IPojLFGo3XJtuzoF8aAitBFGI7WPYheSw7ApK5bsy_ZfRsqraBariLKEzI1N4Thwfh8TM2zfSEURStTArTGInBw')"></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">Admin Usuario</p>
+<p class="text-xs text-slate-400 truncate">Super Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header -->
+<header class="h-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold">Gestión de Personal</h2>
+<div class="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
+<nav class="flex text-sm font-medium text-slate-500">
+<span class="hover:text-primary cursor-pointer">Inicio</span>
+<span class="mx-2">/</span>
+<span class="text-primary dark:text-slate-100">Personal</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 group-focus-within:text-primary">
+<span class="material-symbols-outlined text-xl">search</span>
+</span>
+<input class="bg-slate-100 dark:bg-slate-800 border-none rounded-xl pl-10 pr-4 py-2 w-64 focus:ring-2 focus:ring-primary/20 text-sm" placeholder="Buscar personal..." type="text"/>
+</div>
+<button class="size-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+</button>
+</div>
+</header>
+<!-- Table View -->
+<div class="flex-1 overflow-auto p-8 bg-background-light dark:bg-background-dark">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h3 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Personal Institucional</h3>
+<p class="text-slate-500 mt-1">Visualiza y gestiona la información de todos los colaboradores.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">person_add</span>
+<span>Añadir Personal</span>
+</button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider w-20">Foto</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Nombre Completo</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Rol</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Correo Institucional</th>
+<th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Contrato Reemplazo</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Staff member profile photo - Ana Garcia" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB4pZJYeQtbL-AsIj2B1Smtvbawd7Q1NKejD9nMJRj4IAndGkB3L28pIj43xb483C0nyZyEKi9ZWlkpqfl_k2WcVhRqzK17lj26GX6qQuZzSnML8nFjNK0n9laWk_wCfVFhMi152oJjVciexVrursAEosFMcZGBUa1MWSk_kbPCecyUXbs9JrTtyaYNetaKQQAkDMombyQKnSLdBiyNo60FUCZglnOdIb7pRwQjYiHaxRAsdqSqYOpTqSCmLbhkgeJooJ9OsvIpCQ')"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-slate-900 dark:text-slate-100">Ana García</div>
+<div class="text-xs text-slate-500">ID: AC-9042</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Docente</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                    ana.garcia@acropolis.edu.co
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary dark:text-slate-300 text-sm font-bold hover:underline inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-base">visibility</span>
+                                        Ver Minutas
+                                    </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Staff member profile photo - Carlos Ruiz" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBho5FsLeNbD0NsNUzuGp2lvwzdLWp--hfoWrLMYLK5hc03KSdAhCpv1dJjgNAMNDeh_J0moMlRlZQdIo2_gj2BuoOfWSESRXYU9YvkAMmUJcr8DbSEwI07PD_Sp9ELMGqCpZPdm3gHns-s2fWBNdwVsTPuQVz9uStkB5HESdFfKn-OVsZJnJKRXNXz5AYzAYv5XKo9AAL8dsReMd-lS4gB-2OSOeyof4cpjg4DwVnpyBDDxAV5ohpl0TxlF9bjchf25Fr_4hqNCA')"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-slate-900 dark:text-slate-100">Carlos Ruiz</div>
+<div class="text-xs text-slate-500">ID: AC-9045</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">Coordinador</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                    carlos.ruiz@acropolis.edu.co
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary dark:text-slate-300 text-sm font-bold hover:underline inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-base">visibility</span>
+                                        Ver Minutas
+                                    </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Staff member profile photo - Elena Beltran" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA9Hvy-E12N1emcECMMZuWCGT5dZ42ygGkOJiPni4Pt8Z4UK9UHmF6XrwOAZOX3e1NbBwQ1pXkp348cAc4PS_yKrytJ8-hmBxW3K_LC9-EVJNZyhXUHu_4iUxDYYJ-FMxsV2M9PAhMbb2GwnjUDRxubPFjb8EbeSAtML34ibUuez_d_JvYKuQi0LJUjSh_efeUBOboCk76ApZxo2WVIfLzFkTEsVw1FIxYyjm7J2LDeRa_re9p4kVPqAyXpqKPBQLxlAjU7GFf5bw')"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-slate-900 dark:text-slate-100">Elena Beltrán</div>
+<div class="text-xs text-slate-500">ID: AC-8012</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">Administrativo</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                    elena.beltran@acropolis.edu.co
+                                </td>
+<td class="px-6 py-4 text-right">
+<span class="text-slate-400 text-sm italic">Sin Minutas</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Staff member profile photo - Marcos Perez" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDyHmNz44Wml3N0B60atc4xBtje4EH_9PnJlf9p5zUMn6IuvDLZxhZh40x3kKIFnuSUyKvg5VT34puSkVSQrguhKORzLrn_DpIRTnEBeRT7liTWZeI6696NVgHusuPIeceUN2FYrQlHY7MzcoOrqNIJSj2qIdcUUVvmUKH_19c4S4UTD3geayMcp2Marhq_NzrdbK7_TuA_xQ7_wrjrQc6SZOTLVO2BK5iPxQMq8YcFg-SpyXKlB8esDWIJckLs_7EmGI-Q-W1fzw')"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-slate-900 dark:text-slate-100">Marcos Pérez</div>
+<div class="text-xs text-slate-500">ID: AC-9051</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Docente</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                    marcos.perez@acropolis.edu.co
+                                </td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary dark:text-slate-300 text-sm font-bold hover:underline inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-base">visibility</span>
+                                        Ver Minutas
+                                    </button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="size-10 rounded-full bg-slate-200 bg-cover bg-center" data-alt="Staff member profile photo - Diana Moreno" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBAZnGmUyrUQOuwtkksmNF3caBUR1dplwI7UWbWqVHkFA8U1AgZYVYXwuxMHnMknK_HBFB39BtFdQHjRHgW6JDyrZ1LtRqMoT2q-94Rm3JFYh8MEpM1JhPjbC2A444PSA6UN0Ugd3deDyhtYewOZCRbNn1ItaAFjFDQItbJa339P1xQSwf8-Uh0c4k3TQiJWb378qfUqdmNDVChqXKhYFn0uSZJTEXosi4SL7Wyxcfmesfnvwqw0dL5z3R4rfNvkT8G2Yia85kD7w')"></div>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm font-bold text-slate-900 dark:text-slate-100">Diana Moreno</div>
+<div class="text-xs text-slate-500">ID: AC-9055</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">Psicóloga</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                                    diana.moreno@acropolis.edu.co
+                                </td>
+<td class="px-6 py-4 text-right">
+<span class="text-slate-400 text-sm italic">Sin Minutas</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<p class="text-sm text-slate-500">Mostrando <span class="font-bold text-slate-900 dark:text-slate-100">1</span> a <span class="font-bold text-slate-900 dark:text-slate-100">5</span> de <span class="font-bold text-slate-900 dark:text-slate-100">42</span> resultados</p>
+<div class="flex items-center gap-2">
+<button class="size-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 disabled:opacity-50 transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+</button>
+<button class="size-10 rounded-lg bg-primary text-white flex items-center justify-center font-bold">1</button>
+<button class="size-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 transition-colors">2</button>
+<button class="size-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 transition-colors">3</button>
+<button class="size-10 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-xl">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

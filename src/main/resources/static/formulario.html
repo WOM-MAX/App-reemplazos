@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Nuevo Reemplazo — Colegio Acrópolis</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#0f1729", "accent-orange": "#f97316", "background-light": "#f6f7f8" },
+                    fontFamily: { "display": ["Inter"] },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-nav {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #f97316;
+        }
+
+        .orange-gradient {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light text-slate-900">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-primary text-white flex flex-col shrink-0 shadow-2xl">
+            <div class="p-6 flex items-center gap-3">
+                <div class="size-10 rounded-lg bg-accent-orange flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white">school</span>
+                </div>
+                <div>
+                    <h1 class="text-sm font-bold leading-tight">Colegio Acrópolis</h1>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-widest">Gestión Académica</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 mt-4 space-y-2">
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors"
+                    href="index.html">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 active-nav text-white rounded-r-lg" href="formulario.html">
+                    <span class="material-symbols-outlined text-accent-orange"
+                        style="font-variation-settings: 'FILL' 1">add_circle</span>
+                    <span class="text-sm font-medium">Nuevo Reemplazo</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors"
+                    href="personal.html">
+                    <span class="material-symbols-outlined">group</span>
+                    <span class="text-sm font-medium">Personal</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors"
+                    href="reportes.html">
+                    <span class="material-symbols-outlined">analytics</span>
+                    <span class="text-sm font-medium">Reportes</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors"
+                    href="atrasos.html">
+                    <span class="material-symbols-outlined">schedule</span>
+                    <span class="text-sm font-medium">Atrasos</span>
+                </a>
+                <a id="nav-usuarios"
+                    class="hidden items-center gap-3 px-4 py-3 text-slate-400 hover:text-white transition-colors"
+                    href="usuarios.html">
+                    <span class="material-symbols-outlined">manage_accounts</span>
+                    <span class="text-sm font-medium">Usuarios</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <form action="/api/auth/logout" method="POST">
+                    <button type="submit"
+                        class="flex items-center gap-3 px-4 py-3 text-slate-400 cursor-pointer hover:text-white transition-colors w-full">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="font-medium">Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Header -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
+                <div class="flex items-center gap-2 text-slate-500">
+                    <span class="text-xs font-medium uppercase tracking-wider">Módulo de Reemplazos</span>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    <span class="text-xs font-bold text-primary uppercase tracking-wider">Formulario de Registro</span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-6">
+                        <div class="relative cursor-pointer">
+                            <span
+                                class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+                            <span
+                                class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                        </div>
+                        <span id="header-username"
+                            class="text-sm font-medium text-slate-600 dark:text-slate-300"></span>
+                        <div id="header-avatar"
+                            class="h-10 w-10 rounded-full bg-accent-orange/20 flex items-center justify-center text-accent-orange font-bold">
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Content -->
+            <main class="flex-1 bg-slate-50 overflow-y-auto p-8">
+                <div class="max-w-4xl mx-auto">
+                    <div class="mb-8">
+                        <h2 class="text-3xl font-bold text-primary">Registrar Nuevo Reemplazo</h2>
+                        <p class="text-slate-500 mt-1">Complete la información detallada para asignar la suplencia
+                            docente.</p>
+                    </div>
+                    <!-- Form Card -->
+                    <form id="reemplazo-form"
+                        class="bg-white shadow-xl rounded-xl overflow-hidden border border-slate-100">
+                        <div class="p-8 space-y-8">
+                            <!-- Dropdowns -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-slate-700 block">Docente Ausente</label>
+                                    <div class="relative">
+                                        <select id="docente-ausente"
+                                            class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange appearance-none text-slate-900 font-medium"
+                                            required>
+                                            <option value="">Seleccione el docente que se ausenta</option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">person_off</span>
+                                        <span
+                                            class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-slate-700 block">Reemplazante</label>
+                                    <div class="relative">
+                                        <select id="reemplazante"
+                                            class="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange appearance-none text-slate-900 font-medium"
+                                            required>
+                                            <option value="">Seleccione el docente reemplazante</option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">person_check</span>
+                                        <span
+                                            class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Grid Fields -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Fecha</label>
+                                    <div class="relative">
+                                        <input id="fecha"
+                                            class="w-full h-12 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 text-sm"
+                                            type="date" required />
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">calendar_today</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Hora Inicio</label>
+                                    <div class="relative">
+                                        <input id="hora-inicio"
+                                            class="w-full h-12 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 text-sm"
+                                            type="time" />
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">schedule</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Curso</label>
+                                    <div class="relative">
+                                        <select id="curso-select"
+                                            class="w-full h-12 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange text-sm font-medium appearance-none"
+                                            onchange="onCursoChange()">
+                                            <option value="">Seleccione curso</option>
+                                            <option>PRE KÍNDER</option>
+                                            <option>KÍNDER</option>
+                                            <option>1° A EB</option>
+                                            <option>1° B EB</option>
+                                            <option>2° A EB</option>
+                                            <option>2° B EB</option>
+                                            <option>3° A EB</option>
+                                            <option>3° B EB</option>
+                                            <option>4° A EB</option>
+                                            <option>4° B EB</option>
+                                            <option>5° A EB</option>
+                                            <option>5° B EB</option>
+                                            <option>6° A EB</option>
+                                            <option>6° B EB</option>
+                                            <option>7° A EB</option>
+                                            <option>7° B EB</option>
+                                            <option>8° A EB</option>
+                                            <option>8° B EB</option>
+                                            <option>1° MEDIO A</option>
+                                            <option>1° MEDIO B</option>
+                                            <option>2° MEDIO A</option>
+                                            <option>2° MEDIO B</option>
+                                            <option>3° MEDIO A</option>
+                                            <option>3° MEDIO B</option>
+                                            <option>4° MEDIO A</option>
+                                            <option>4° MEDIO B</option>
+                                            <option value="__other__">✏️ Otro (escribir manualmente)...</option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">meeting_room</span>
+                                        <span
+                                            class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
+                                    </div>
+                                    <!-- Custom Curso Input (hidden by default) -->
+                                    <div id="custom-curso-container" class="hidden relative">
+                                        <input id="custom-curso-input"
+                                            class="w-full h-12 pl-10 pr-10 bg-amber-50 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-400/20 text-sm font-medium"
+                                            placeholder="Escriba el curso..." type="text" />
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 text-lg">edit</span>
+                                        <button type="button" onclick="cancelCustomCurso()"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors">
+                                            <span class="material-symbols-outlined text-lg">close</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-slate-500 uppercase">Asignatura</label>
+                                    <div class="relative">
+                                        <select id="asignatura-select"
+                                            class="w-full h-12 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange text-sm font-medium appearance-none"
+                                            onchange="onAsignaturaChange()">
+                                            <option value="">Seleccione asignatura</option>
+                                            <option>Adolescencia y Sexualidad</option>
+                                            <option>Artes Visuales</option>
+                                            <option>Artes visuales, audiovisuales y multimediales</option>
+                                            <option>Biología</option>
+                                            <option>Ciencias de la salud</option>
+                                            <option>Ciencias Naturales</option>
+                                            <option>Ciencias para la Ciudadanía</option>
+                                            <option>Comprensión Entorno Sociocultural</option>
+                                            <option>Comprensión Histórica del Presente</option>
+                                            <option>Consejo de Curso</option>
+                                            <option>Creación y composición musical</option>
+                                            <option>Decisión Vocacional y Proyecto de vida</option>
+                                            <option>Educación Ciudadana</option>
+                                            <option>Educación Física y Salud</option>
+                                            <option>Exploración entorno natural</option>
+                                            <option>Expresión corporal</option>
+                                            <option>Filosofía</option>
+                                            <option>Filosofía Política</option>
+                                            <option>Física</option>
+                                            <option>Geometría 3D</option>
+                                            <option>Historia, Geografía y Ciencias Sociales</option>
+                                            <option>Hora cero</option>
+                                            <option>Idioma Extranjero Inglés</option>
+                                            <option>Lectura y Escritura Especializada</option>
+                                            <option>Lengua y Literatura</option>
+                                            <option>Lenguaje (oral y escrito)</option>
+                                            <option>Lenguaje artístico musical</option>
+                                            <option>Lenguaje artístico visual</option>
+                                            <option>Lenguaje y comunicación</option>
+                                            <option>Límites y derivadas</option>
+                                            <option>Matemática</option>
+                                            <option>Música</option>
+                                            <option>Orientación</option>
+                                            <option>Orientación Vocacional</option>
+                                            <option>Pensamiento matemático 1 (números, operaciones y patrones)</option>
+                                            <option>Pensamiento matemático 2 (geometría y mediciones)</option>
+                                            <option>Química</option>
+                                            <option>Religión</option>
+                                            <option>Taller de Acompañamiento Lenguaje</option>
+                                            <option>Taller de Autocuidado y Desarrollo Socioemocional</option>
+                                            <option>Taller de Filosofía Ética y Estética</option>
+                                            <option>Taller de Formación Ciudadana</option>
+                                            <option>Taller de Habilidades SIMCE</option>
+                                            <option>Taller de Habilidades Socioemocionales</option>
+                                            <option>Taller de Idioma Extranjero Inglés</option>
+                                            <option>Taller de Informática</option>
+                                            <option>Taller de lectura compartida</option>
+                                            <option>Taller de Psicomotricidad</option>
+                                            <option>Taller Extraprogramático</option>
+                                            <option>Taller Habilidades Lingüísticas</option>
+                                            <option>Taller Habilidades Matemáticas</option>
+                                            <option>Taller PAES Lenguaje</option>
+                                            <option>Taller PAES matemática</option>
+                                            <option>Taller Pensamiento Matemático</option>
+                                            <option>Tecnología</option>
+                                            <option>Vínculo y Relaciones Interpersonales</option>
+                                            <option value="__otra__" class="font-bold text-accent-orange">✏️ Otra
+                                                (escribir manualmente)...</option>
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">book</span>
+                                        <span
+                                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">expand_more</span>
+                                    </div>
+                                    <!-- Input manual (oculto por defecto) -->
+                                    <div id="asignatura-custom-wrapper" class="hidden relative mt-2">
+                                        <input id="asignatura-custom"
+                                            class="w-full h-12 pl-10 pr-10 bg-amber-50 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-accent-orange/20 focus:border-accent-orange text-sm font-medium"
+                                            placeholder="Escriba la asignatura..." type="text" />
+                                        <span
+                                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-amber-500 text-lg">edit</span>
+                                        <button type="button" onclick="cancelCustomAsignatura()"
+                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 transition-colors"
+                                            title="Volver al listado">
+                                            <span class="material-symbols-outlined text-lg">close</span>
+                                        </button>
+                                    </div>
+                                    <input type="hidden" id="asignatura" />
+                                </div>
+                            </div>
+                            <!-- Duración -->
+                            <div class="bg-primary/5 p-6 rounded-xl border border-primary/10">
+                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                    <div class="max-w-md">
+                                        <h3 class="text-lg font-bold text-primary">Duración del Reemplazo</h3>
+                                        <p class="text-xs text-slate-500">Especifique el tiempo total de la sesión en
+                                            minutos para el cálculo de honorarios.</p>
+                                    </div>
+                                    <div class="relative w-full md:w-48">
+                                        <input id="minutos"
+                                            class="w-full h-16 text-center text-3xl font-black text-primary bg-white border-2 border-primary/20 rounded-xl focus:ring-4 focus:ring-accent-orange/10 focus:border-accent-orange"
+                                            type="number" value="45" min="1" required />
+                                        <span
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 uppercase">Min</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Submit Button -->
+                            <div class="pt-4">
+                                <button type="submit"
+                                    class="w-full h-16 orange-gradient text-white font-bold text-lg rounded-xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.4)] hover:shadow-[0_15px_30px_-5px_rgba(249,115,22,0.5)] transition-all flex items-center justify-center gap-3 active:scale-[0.99]">
+                                    <span class="material-symbols-outlined">assignment_turned_in</span>
+                                    Registrar Reemplazo
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Footer Info -->
+                    <div class="mt-8 flex items-center justify-center gap-6 text-slate-400 text-xs">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">verified_user</span>
+                            Registro seguro
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">cloud_done</span>
+                            Autoguardado activado
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const API = '';
+
+        /* ── Asignatura: select + opción manual ── */
+        function onAsignaturaChange() {
+            const sel = document.getElementById('asignatura-select');
+            const wrapper = document.getElementById('asignatura-custom-wrapper');
+            const hidden = document.getElementById('asignatura');
+
+            if (sel.value === '__otra__') {
+                wrapper.classList.remove('hidden');
+                document.getElementById('asignatura-custom').focus();
+                hidden.value = '';
+            } else {
+                wrapper.classList.add('hidden');
+                document.getElementById('asignatura-custom').value = '';
+                hidden.value = sel.value;
+            }
+        }
+
+        function cancelCustomAsignatura() {
+            const sel = document.getElementById('asignatura-select');
+            sel.value = '';
+            document.getElementById('asignatura-custom').value = '';
+            document.getElementById('asignatura-custom-wrapper').classList.add('hidden');
+            document.getElementById('asignatura').value = '';
+        }
+
+        function getAsignatura() {
+            const sel = document.getElementById('asignatura-select');
+            if (sel.value === '__otra__') {
+                return document.getElementById('asignatura-custom').value.trim() || null;
+            }
+            return sel.value || null;
+        }
+
+        /* ── Curso: select + opción manual ── */
+        function onCursoChange() {
+            const sel = document.getElementById('curso-select');
+            const container = document.getElementById('custom-curso-container');
+            if (sel.value === '__other__') {
+                container.classList.remove('hidden');
+                document.getElementById('custom-curso-input').focus();
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('custom-curso-input').value = '';
+            }
+        }
+
+        function cancelCustomCurso() {
+            document.getElementById('curso-select').value = '';
+            document.getElementById('custom-curso-input').value = '';
+            document.getElementById('custom-curso-container').classList.add('hidden');
+        }
+
+        function getCurso() {
+            const sel = document.getElementById('curso-select');
+            if (sel.value === '__other__') {
+                return document.getElementById('custom-curso-input').value.trim() || null;
+            }
+            return sel.value || null;
+        }
+
+        /* ── Cargar personal en selects ── */
+        async function loadPersonal() {
+            try {
+                const res = await fetch(`${API}/api/personal`);
+                const personal = await res.json();
+
+                const selectAusente = document.getElementById('docente-ausente');
+                const selectReemplazante = document.getElementById('reemplazante');
+
+                personal.forEach(p => {
+                    const label = `${p.apellidos.toUpperCase()} ${p.nombre.toUpperCase()}`;
+                    selectAusente.innerHTML += `<option value="${p.id}">${label}</option>`;
+                    selectReemplazante.innerHTML += `<option value="${p.id}">${label}</option>`;
+                });
+            } catch (err) {
+                console.error('Error loading personal:', err);
+            }
+        }
+
+        /* ── Submit del formulario ── */
+        document.getElementById('reemplazo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const ausenteId = document.getElementById('docente-ausente').value;
+            const reemplazanteId = document.getElementById('reemplazante').value;
+
+            if (!ausenteId || !reemplazanteId) {
+                Swal.fire({ icon: 'warning', title: 'Campos requeridos', text: 'Seleccione tanto el docente ausente como el reemplazante.' });
+                return;
+            }
+
+            if (ausenteId === reemplazanteId) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'El docente ausente y el reemplazante no pueden ser la misma persona.' });
+                return;
+            }
+
+            const payload = {
+                docenteAusenteId: parseInt(ausenteId),
+                reemplazanteId: parseInt(reemplazanteId),
+                fecha: document.getElementById('fecha').value,
+                horaInicio: document.getElementById('hora-inicio').value || null,
+                curso: getCurso(),
+                asignatura: getAsignatura(),
+                minutosReemplazo: parseInt(document.getElementById('minutos').value)
+            };
+
+            try {
+                const res = await fetch(`${API}/api/reemplazos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Registrado!',
+                        text: 'El reemplazo ha sido registrado exitosamente.',
+                        confirmButtonColor: '#f97316'
+                    }).then(() => {
+                        document.getElementById('reemplazo-form').reset();
+                        document.getElementById('minutos').value = 45;
+                        cancelCustomAsignatura();
+                        cancelCustomCurso();
+                    });
+                } else {
+                    const err = await res.text();
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo registrar el reemplazo. ' + err });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.' });
+            }
+        });
+
+        // Set today's date
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            loadPersonal();
+            // Auth
+            fetch('/api/auth/me').then(r => r.ok ? r.json() : null).then(user => {
+                if (!user) return;
+                const avatar = document.getElementById('header-avatar');
+                const uname = document.getElementById('header-username');
+                if (avatar) avatar.textContent = (user.username || 'U')[0].toUpperCase();
+                if (uname) uname.textContent = user.username || '';
+                if (user.rol === 'ADMIN') {
+                    const nav = document.getElementById('nav-usuarios');
+                    if (nav) nav.classList.replace('hidden', 'flex');
+                }
+            }).catch(() => { });
+        });
+    </script>
+</body>
+
+</html>

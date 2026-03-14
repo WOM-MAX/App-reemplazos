@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Atrasos — Colegio Acrópolis</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0f1729",
+                        "accent-orange": "#f97316",
+                        "background-light": "#f6f7f8",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .active-nav {
+            background-color: #f97316;
+            color: white !important;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-background-light font-display">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-primary dark:bg-slate-950 flex flex-col shrink-0 no-print">
+            <div class="p-6 flex items-center gap-3">
+                <div
+                    class="h-10 w-10 bg-accent-orange rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    A</div>
+                <div>
+                    <h1 class="text-white text-lg font-bold leading-none">Acrópolis</h1>
+                    <p class="text-slate-400 text-xs mt-1 uppercase tracking-widest">Institución Educativa</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 mt-6 space-y-2">
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="index.html">
+                    <span class="material-symbols-outlined">dashboard</span><span class="font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="formulario.html">
+                    <span class="material-symbols-outlined">add_circle</span><span class="font-medium">Nuevo
+                        Reemplazo</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="personal.html">
+                    <span class="material-symbols-outlined">group</span><span class="font-medium">Personal</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="reportes.html">
+                    <span class="material-symbols-outlined">analytics</span><span class="font-medium">Reportes</span>
+                </a>
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 rounded-xl active-nav transition-all duration-200"
+                    href="atrasos.html">
+                    <span class="material-symbols-outlined">schedule</span><span class="font-medium">Atrasos</span>
+                </a>
+                <a id="nav-usuarios"
+                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="usuarios.html">
+                    <span class="material-symbols-outlined">manage_accounts</span><span
+                        class="font-medium">Usuarios</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-slate-800">
+                <form action="/api/auth/logout" method="POST">
+                    <button type="submit"
+                        class="flex items-center gap-3 px-4 py-3 text-slate-400 cursor-pointer hover:text-white transition-colors w-full">
+                        <span class="material-symbols-outlined">logout</span><span class="font-medium">Cerrar
+                            Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-y-auto">
+            <header
+                class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 no-print">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-accent-orange text-2xl">schedule</span>
+                    <h2 class="text-xl font-bold text-slate-900 uppercase tracking-tight">Control de Atrasos</h2>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3 border-l border-slate-200 pl-6">
+                        <div class="relative cursor-pointer">
+                            <span class="material-symbols-outlined text-slate-600">notifications</span>
+                            <span
+                                class="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-white"></span>
+                        </div>
+                        <span id="header-username" class="text-sm font-medium text-slate-600"></span>
+                        <div id="header-avatar"
+                            class="h-10 w-10 rounded-full bg-accent-orange/20 flex items-center justify-center text-accent-orange font-bold">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 space-y-8 bg-slate-50 min-h-full">
+
+                <!-- ═══ REGISTRO DE ATRASO ═══ -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden no-print">
+                    <div class="bg-primary p-5 text-white flex items-center gap-3">
+                        <span class="material-symbols-outlined text-accent-orange">alarm_add</span>
+                        <h3 class="text-base font-bold">Registrar Atraso</h3>
+                    </div>
+                    <form id="formAtraso" class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="space-y-1 md:col-span-1">
+                                <label
+                                    class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funcionario</label>
+                                <select id="selectPersonal"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    required>
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</label>
+                                <input id="inputFecha" type="date"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    required />
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Minutos de
+                                    Atraso</label>
+                                <input id="inputMinutos" type="number" min="1" max="480"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center"
+                                    placeholder="Ej: 15" required />
+                            </div>
+                            <div class="space-y-1">
+                                <label
+                                    class="text-xs font-bold text-slate-500 uppercase tracking-wider">Observación</label>
+                                <input id="inputObs" type="text" maxlength="200"
+                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
+                                    placeholder="Opcional..." />
+                            </div>
+                        </div>
+                        <div class="flex justify-end mt-4">
+                            <button type="submit" id="btnRegistrar"
+                                class="h-11 px-8 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">save</span> Registrar Atraso
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ═══ FILTROS PARA LISTADO ═══ -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                    <div class="flex flex-wrap items-end gap-4">
+                        <div class="space-y-1 flex-1 min-w-[200px]">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funcionario
+                                (filtro)</label>
+                            <select id="filterPersonal"
+                                class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                <option value="">— Todos —</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mes</label>
+                            <select id="filterMes"
+                                class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"></select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Año</label>
+                            <select id="filterAnio"
+                                class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"></select>
+                        </div>
+                        <button id="btnFiltrar"
+                            class="h-11 px-6 bg-primary text-white font-bold rounded-lg hover:bg-slate-800 transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">search</span> Consultar
+                        </button>
+                    </div>
+
+                    <!-- Summary Cards (shown when filtering by individual) -->
+                    <div id="resumenCards" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 relative overflow-hidden">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Días</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="valDias" class="text-3xl font-black text-primary">0</span>
+                                <span class="text-sm text-slate-400">días</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-amber-500/10 p-4 rounded-full text-amber-500">
+                                <span class="material-symbols-outlined text-3xl">calendar_month</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 relative overflow-hidden">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Minutos</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="valTotalMin" class="text-3xl font-black text-rose-500">0</span>
+                                <span class="text-sm text-slate-400">min</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-rose-500/10 p-4 rounded-full text-rose-500">
+                                <span class="material-symbols-outlined text-3xl">timer</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-100 relative overflow-hidden">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Promedio / Día</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="valPromedio" class="text-3xl font-black text-amber-500">0</span>
+                                <span class="text-sm text-slate-400">min</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-blue-500/10 p-4 rounded-full text-blue-500">
+                                <span class="material-symbols-outlined text-3xl">avg_pace</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ TABLA DE ATRASOS ═══ -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900">Listado de Atrasos</h4>
+                            <p id="atrasosCount" class="text-xs text-slate-400 mt-1"></p>
+                        </div>
+                        <button id="btnImprimir"
+                            class="no-print h-10 px-5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all flex items-center gap-2 text-sm">
+                            <span class="material-symbols-outlined text-lg">print</span> Imprimir
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Fecha</th>
+                                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Funcionario</th>
+                                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        RUN</th>
+                                    <th
+                                        class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                                        Minutos</th>
+                                    <th class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                        Observación</th>
+                                    <th
+                                        class="px-5 py-3.5 text-xs font-bold text-slate-500 uppercase tracking-wider text-center no-print">
+                                        Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="atrasosBody" class="divide-y divide-slate-100"></tbody>
+                            <tfoot>
+                                <tr class="bg-slate-50 border-t-2 border-slate-200">
+                                    <td colspan="3" class="px-5 py-4 text-sm font-black text-slate-700 uppercase">Total
+                                    </td>
+                                    <td class="px-5 py-4 text-center">
+                                        <span id="footerTotal" class="text-sm font-black text-primary"></span>
+                                    </td>
+                                    <td></td>
+                                    <td class="no-print"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div id="noAtrasos" class="hidden p-12 text-center">
+                        <span class="material-symbols-outlined text-4xl text-slate-300 mb-3">event_available</span>
+                        <p class="text-sm text-slate-400 font-medium">Sin atrasos registrados en este período.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal"
+        class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center backdrop-blur-sm no-print">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-primary p-6 text-white">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined">edit_note</span> Modificar Atraso
+                </h3>
+            </div>
+            <form id="edit-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-id" />
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Funcionario</label>
+                    <input id="edit-nombre" type="text"
+                        class="w-full h-11 px-3 bg-slate-100 border border-slate-200 rounded-lg text-sm" disabled />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Fecha</label>
+                        <input id="edit-fecha" type="text"
+                            class="w-full h-11 px-3 bg-slate-100 border border-slate-200 rounded-lg text-sm" disabled />
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase">Minutos</label>
+                        <input id="edit-minutos" type="number" min="1" max="480"
+                            class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center"
+                            required />
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Observación</label>
+                    <input id="edit-obs" type="text" maxlength="200"
+                        class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                        class="flex-1 h-12 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg">save</span> Guardar
+                    </button>
+                    <button type="button" onclick="closeEditModal()"
+                        class="flex-1 h-12 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API = window.location.origin;
+        const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        let atrasosCache = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Auth check
+            try {
+                const authRes = await fetch('/api/auth/me');
+                if (authRes.ok) {
+                    const user = await authRes.json();
+                    const avatar = document.getElementById('header-avatar');
+                    const uname = document.getElementById('header-username');
+                    if (avatar) avatar.textContent = (user.username || 'U')[0].toUpperCase();
+                    if (uname) uname.textContent = user.username || '';
+                    if (user.rol === 'ADMIN') {
+                        const nav = document.getElementById('nav-usuarios');
+                        if (nav) nav.classList.replace('hidden', 'flex');
+                    }
+                }
+            } catch (e) { }
+
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+
+            // Populate month selectors
+            document.getElementById('filterMes').innerHTML = MESES.map((m, i) =>
+                `<option value="${i + 1}" ${i + 1 === currentMonth ? 'selected' : ''}>${m}</option>`
+            ).join('');
+
+            // Populate year selectors
+            const filterAnio = document.getElementById('filterAnio');
+            for (let y = 2020; y <= currentYear + 1; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                if (y === currentYear) opt.selected = true;
+                filterAnio.appendChild(opt);
+            }
+
+            // Set default date
+            document.getElementById('inputFecha').value = now.toISOString().split('T')[0];
+
+            // Load personal
+            await loadPersonal();
+
+            // Load initial data
+            loadAtrasos();
+        });
+
+        async function loadPersonal() {
+            try {
+                const res = await fetch(`${API}/api/personal`);
+                const list = await res.json();
+                const options = list.map(p => `<option value="${p.id}">${p.apellidos.toUpperCase()} ${p.nombre.toUpperCase()} — ${p.run}</option>`).join('');
+                document.getElementById('selectPersonal').innerHTML = '<option value="">— Seleccionar —</option>' + options;
+                document.getElementById('filterPersonal').innerHTML = '<option value="">— Todos —</option>' + options;
+            } catch (e) {
+                console.error('Error cargando personal:', e);
+            }
+        }
+
+        // ═══ REGISTRO ═══
+        document.getElementById('formAtraso').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                personalId: parseInt(document.getElementById('selectPersonal').value),
+                fecha: document.getElementById('inputFecha').value,
+                minutosAtraso: parseInt(document.getElementById('inputMinutos').value),
+                observacion: document.getElementById('inputObs').value || null
+            };
+
+            const btn = document.getElementById('btnRegistrar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Guardando...';
+
+            try {
+                const res = await fetch(`${API}/api/atrasos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    Swal.fire({ icon: 'success', title: '¡Registrado!', text: 'Atraso registrado correctamente.', confirmButtonColor: '#f97316', timer: 2000 });
+                    document.getElementById('inputMinutos').value = '';
+                    document.getElementById('inputObs').value = '';
+                    loadAtrasos();
+                } else {
+                    const err = await res.json();
+                    Swal.fire({ icon: 'error', title: 'Error', text: err.error || 'No se pudo registrar el atraso.' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-lg">save</span> Registrar Atraso';
+            }
+        });
+
+        // ═══ LISTAR ═══
+        document.getElementById('btnFiltrar').addEventListener('click', loadAtrasos);
+
+        async function loadAtrasos() {
+            const personalId = document.getElementById('filterPersonal').value;
+            const mes = document.getElementById('filterMes').value;
+            const anio = document.getElementById('filterAnio').value;
+            const resumenCards = document.getElementById('resumenCards');
+
+            try {
+                if (personalId) {
+                    // Individual summary
+                    const res = await fetch(`${API}/api/atrasos/resumen/${personalId}?mes=${mes}&anio=${anio}`);
+                    const data = await res.json();
+
+                    document.getElementById('valDias').textContent = data.totalDias;
+                    document.getElementById('valTotalMin').textContent = data.totalMinutos;
+                    document.getElementById('valPromedio').textContent = data.promedioMinutos;
+                    resumenCards.classList.remove('hidden');
+                    resumenCards.classList.add('grid');
+
+                    renderTable(data.atrasos || []);
+                } else {
+                    // All employees
+                    resumenCards.classList.add('hidden');
+                    resumenCards.classList.remove('grid');
+
+                    const res = await fetch(`${API}/api/atrasos?mes=${mes}&anio=${anio}`);
+                    const data = await res.json();
+                    renderTable(data);
+                }
+            } catch (err) {
+                console.error('Error cargando atrasos:', err);
+            }
+        }
+
+        function renderTable(atrasos) {
+            atrasosCache = atrasos;
+            const tbody = document.getElementById('atrasosBody');
+            const noAtrasos = document.getElementById('noAtrasos');
+            tbody.innerHTML = '';
+
+            if (atrasos.length === 0) {
+                noAtrasos.classList.remove('hidden');
+                tbody.parentElement.querySelector('thead').classList.add('hidden');
+                tbody.parentElement.querySelector('tfoot').classList.add('hidden');
+                document.getElementById('atrasosCount').textContent = '0 registros';
+                document.getElementById('footerTotal').textContent = '0 min';
+                return;
+            }
+
+            noAtrasos.classList.add('hidden');
+            tbody.parentElement.querySelector('thead').classList.remove('hidden');
+            tbody.parentElement.querySelector('tfoot').classList.remove('hidden');
+            document.getElementById('atrasosCount').textContent = `${atrasos.length} registro${atrasos.length > 1 ? 's' : ''}`;
+
+            let total = 0;
+            atrasos.forEach(a => {
+                total += a.minutosAtraso;
+                const nombre = a.personal ? `${a.personal.apellidos.toUpperCase()} ${a.personal.nombre.toUpperCase()}` : '—';
+                const run = a.personal ? a.personal.run : '—';
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50/50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-5 py-3.5 text-sm font-medium text-slate-700">${formatDate(a.fecha)}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-700">${nombre}</td>
+                    <td class="px-5 py-3.5 text-sm text-slate-500">${run}</td>
+                    <td class="px-5 py-3.5 text-center">
+                        <span class="inline-block px-3 py-1 rounded-lg text-sm font-bold bg-rose-50 text-rose-600">${a.minutosAtraso} min</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-sm text-slate-400">${a.observacion || '—'}</td>
+                    <td class="px-5 py-3.5 text-center no-print">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="openEditModal(${a.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            <button onclick="deleteAtraso(${a.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('footerTotal').textContent = `${total} min`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        // ═══ EDITAR ═══
+        function openEditModal(id) {
+            const a = atrasosCache.find(x => x.id === id);
+            if (!a) return;
+
+            document.getElementById('edit-id').value = a.id;
+            document.getElementById('edit-nombre').value = a.personal ? `${a.personal.apellidos.toUpperCase()} ${a.personal.nombre.toUpperCase()}` : '';
+            document.getElementById('edit-fecha').value = formatDate(a.fecha);
+            document.getElementById('edit-minutos').value = a.minutosAtraso;
+            document.getElementById('edit-obs').value = a.observacion || '';
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+            document.getElementById('edit-modal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+            document.getElementById('edit-modal').classList.remove('flex');
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const payload = {
+                minutosAtraso: parseInt(document.getElementById('edit-minutos').value),
+                observacion: document.getElementById('edit-obs').value || null
+            };
+            try {
+                const res = await fetch(`${API}/api/atrasos/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeEditModal();
+                    Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Atraso modificado correctamente.', confirmButtonColor: '#f97316', timer: 2000 });
+                    loadAtrasos();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar.' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar.' });
+            }
+        });
+
+        // ═══ ELIMINAR ═══
+        async function deleteAtraso(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar este atraso?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            if (!result.isConfirmed) return;
+            try {
+                const res = await fetch(`${API}/api/atrasos/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    Swal.fire({ icon: 'success', title: 'Eliminado', text: 'Atraso eliminado correctamente.', confirmButtonColor: '#f97316', timer: 2000 });
+                    loadAtrasos();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar.' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar.' });
+            }
+        }
+
+        // Close modal on backdrop
+        document.getElementById('edit-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeEditModal();
+        });
+
+        // Print
+        document.getElementById('btnImprimir').addEventListener('click', () => window.print());
+    </script>
+</body>
+
+</html>
