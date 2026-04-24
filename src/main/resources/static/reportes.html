@@ -122,8 +122,11 @@
                     <span class="material-symbols-outlined">schedule</span>
                     <span class="font-medium">Atrasos</span>
                 </a>
-                <a id="nav-usuarios"
-                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="feriados.html">
+                    <span class="material-symbols-outlined">event_busy</span><span class="font-medium">Feriados Escolares</span>
+                </a>
+                <a id="nav-usuarios" class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
                     href="usuarios.html">
                     <span class="material-symbols-outlined">manage_accounts</span>
                     <span class="font-medium">Usuarios</span>
@@ -273,7 +276,7 @@
                     </div>
 
                     <!-- Balance Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Min. Contrato -->
                         <div
                             class="balance-card bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
@@ -308,6 +311,18 @@
                             </div>
                             <div class="absolute -top-2 -right-2 bg-rose-500/10 p-4 rounded-full text-rose-500">
                                 <span class="material-symbols-outlined text-3xl">person_off</span>
+                            </div>
+                        </div>
+                        <!-- Σ Min. Atraso -->
+                        <div
+                            class="balance-card bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Σ Min. Atraso</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="valAtraso" class="text-3xl font-black text-amber-500">0</span>
+                                <span class="text-sm text-slate-400">min</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-amber-500/10 p-4 rounded-full text-amber-500">
+                                <span class="material-symbols-outlined text-3xl">timer</span>
                             </div>
                         </div>
                     </div>
@@ -359,19 +374,7 @@
                                 </thead>
                                 <tbody id="movimientosBody" class="divide-y divide-slate-100 dark:divide-slate-700">
                                 </tbody>
-                                <tfoot>
-                                    <tr
-                                        class="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-600">
-                                        <td colspan="6"
-                                            class="px-5 py-4 text-sm font-black text-slate-700 dark:text-slate-200 uppercase">
-                                            Totales del Período</td>
-                                        <td class="px-5 py-4 text-right">
-                                            <span id="totalMinutos"
-                                                class="text-sm font-black text-primary dark:text-white"></span>
-                                        </td>
-                                        <td class="no-print"></td>
-                                    </tr>
-                                </tfoot>
+
                             </table>
                         </div>
                         <!-- Empty movements message -->
@@ -566,11 +569,10 @@
             document.getElementById('employeeCargo').textContent = balance.cargo || 'Sin cargo';
 
             // Balance cards
-            document.getElementById('valContrato').textContent = balance.minutosContratoReemplazo;
-            document.getElementById('valReemplazo').textContent = balance.totalMinutosReemplazante;
-            document.getElementById('valAusencia').textContent = balance.totalMinutosAusente;
-
-
+            document.getElementById('valContrato').textContent = balance.minutosContratoReemplazo || 0;
+            document.getElementById('valReemplazo').textContent = balance.totalMinutosReemplazante || 0;
+            document.getElementById('valAusencia').textContent = balance.totalMinutosAusente || 0;
+            document.getElementById('valAtraso').textContent = balance.totalMinutosAtraso || 0;
 
             // Period label
             const periodoText = `${MESES[mes - 1]} ${anio}`;
@@ -582,64 +584,85 @@
             const tbody = document.getElementById('movimientosBody');
             const noMov = document.getElementById('noMovimientos');
             tbody.innerHTML = '';
+            
+            const atrasosArray = data.atrasos || [];
+            
+            const todos = [];
+            movimientos.forEach(m => todos.push({ ...m, _type: 'reemplazo' }));
+            atrasosArray.forEach(a => todos.push({ ...a, _type: 'atraso' }));
+            
+            // Orden descendente por fecha
+            todos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-            if (movimientos.length === 0) {
+            if (todos.length === 0) {
                 noMov.classList.remove('hidden');
                 tbody.parentElement.querySelector('thead').classList.add('hidden');
-                tbody.parentElement.querySelector('tfoot').classList.add('hidden');
                 document.getElementById('movimientosCount').textContent = '0 movimientos';
-                document.getElementById('totalMinutos').textContent = '0 min';
                 return;
             }
 
             noMov.classList.add('hidden');
             tbody.parentElement.querySelector('thead').classList.remove('hidden');
-            tbody.parentElement.querySelector('tfoot').classList.remove('hidden');
-            document.getElementById('movimientosCount').textContent = `${movimientos.length} movimiento${movimientos.length > 1 ? 's' : ''}`;
+            document.getElementById('movimientosCount').textContent = `${todos.length} movimiento${todos.length > 1 ? 's' : ''}`;
 
             let totalMin = 0;
 
-            movimientos.forEach(mov => {
-                const isAusente = mov.docenteAusente.id === pid;
-                const rol = isAusente ? 'AUSENTE' : 'REEMPLAZANTE';
-                const contraparte = isAusente
-                    ? `${mov.reemplazante.apellidos} ${mov.reemplazante.nombre}`
-                    : `${mov.docenteAusente.apellidos} ${mov.docenteAusente.nombre}`;
-
-                totalMin += mov.minutosReemplazo;
-
+            todos.forEach(mov => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors';
 
-                row.innerHTML = `
-            <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.horaInicio || '—'}</td>
-            <td class="px-5 py-3.5">
-                <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${isAusente
-                        ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                    }">${rol}</span>
-            </td>
-            <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">${contraparte.toUpperCase()}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.curso || '—'}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.asignatura || '—'}</td>
-            <td class="px-5 py-3.5 text-sm font-bold text-right ${isAusente ? 'text-rose-500' : 'text-emerald-500'}">${mov.minutosReemplazo} min</td>
-            <td class="px-5 py-3.5 text-center no-print">
-                <div class="flex items-center justify-center gap-1">
-                    <button onclick="openEditModal(${mov.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                    </button>
-                    <button onclick="deleteReemplazo(${mov.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                </div>
-            </td>
-        `;
+                if (mov._type === 'reemplazo') {
+                    const isAusente = mov.docenteAusente.id === pid;
+                    const rol = isAusente ? 'AUSENTE' : 'REEMPLAZANTE';
+                    const contraparte = isAusente
+                        ? `${mov.reemplazante.apellidos} ${mov.reemplazante.nombre}`
+                        : `${mov.docenteAusente.apellidos} ${mov.docenteAusente.nombre}`;
 
+                    totalMin += mov.minutosReemplazo;
+
+                    row.innerHTML = `
+                <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.horaInicio || '—'}</td>
+                <td class="px-5 py-3.5">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${isAusente
+                            ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        }">${rol}</span>
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">${contraparte.toUpperCase()}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.curso || '—'}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.asignatura || '—'}</td>
+                <td class="px-5 py-3.5 text-sm font-bold text-right ${isAusente ? 'text-rose-500' : 'text-emerald-500'}">${mov.minutosReemplazo} min</td>
+                <td class="px-5 py-3.5 text-center no-print">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="openEditModal(${mov.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                        <button onclick="deleteReemplazo(${mov.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </button>
+                    </div>
+                </td>
+            `;
+                } else {
+                    // Atraso
+                    totalMin += mov.minutosAtraso;
+                    row.innerHTML = `
+                <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">ATRASO</span>
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">—</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5 text-sm font-bold text-right text-amber-500">${mov.minutosAtraso} min</td>
+                <td class="px-5 py-3.5 text-center no-print">
+                </td>
+            `;
+                }
                 tbody.appendChild(row);
             });
-
-            document.getElementById('totalMinutos').textContent = `${totalMin} min`;
         }
 
         function formatDate(dateStr) {

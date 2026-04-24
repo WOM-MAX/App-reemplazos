@@ -87,8 +87,11 @@
                     href="atrasos.html">
                     <span class="material-symbols-outlined">schedule</span><span class="font-medium">Atrasos</span>
                 </a>
-                <a id="nav-usuarios"
-                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="feriados.html">
+                    <span class="material-symbols-outlined">event_busy</span><span class="font-medium">Feriados Escolares</span>
+                </a>
+                <a id="nav-usuarios" class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
                     href="usuarios.html">
                     <span class="material-symbols-outlined">manage_accounts</span><span
                         class="font-medium">Usuarios</span>
@@ -132,49 +135,90 @@
 
                 <!-- ═══ REGISTRO DE ATRASO ═══ -->
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden no-print">
-                    <div class="bg-primary p-5 text-white flex items-center gap-3">
-                        <span class="material-symbols-outlined text-accent-orange">alarm_add</span>
-                        <h3 class="text-base font-bold">Registrar Atraso</h3>
+                    <div class="bg-primary flex">
+                        <button id="tab-diario" onclick="switchTab('diario')" class="flex-1 py-4 text-white font-bold bg-primary border-b-4 border-accent-orange transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-accent-orange tab-icon">alarm_add</span> Ingreso Rápido
+                        </button>
+                        <button id="tab-masivo" onclick="switchTab('masivo')" class="flex-1 py-4 text-slate-400 font-medium bg-slate-900 border-b-4 border-transparent hover:text-white transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-slate-400 tab-icon">calendar_month</span> Carga Mensual
+                        </button>
                     </div>
+
+                    <!-- Formulario Ingreso Rápido -->
                     <form id="formAtraso" class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="space-y-1 md:col-span-1">
-                                <label
-                                    class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funcionario</label>
-                                <select id="selectPersonal"
-                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
-                                    required>
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funcionario</label>
+                                <select id="selectPersonal" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" required>
                                     <option value="">— Seleccionar —</option>
                                 </select>
                             </div>
                             <div class="space-y-1">
                                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha</label>
-                                <input id="inputFecha" type="date"
-                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
-                                    required />
+                                <input id="inputFecha" type="date" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" required />
                             </div>
                             <div class="space-y-1">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Minutos de
-                                    Atraso</label>
-                                <input id="inputMinutos" type="number" min="1" max="480"
-                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center"
-                                    placeholder="Ej: 15" required />
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Minutos de Atraso</label>
+                                <input id="inputMinutos" type="number" min="1" max="480" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold text-center" placeholder="Ej: 15" required />
                             </div>
                             <div class="space-y-1">
-                                <label
-                                    class="text-xs font-bold text-slate-500 uppercase tracking-wider">Observación</label>
-                                <input id="inputObs" type="text" maxlength="200"
-                                    class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"
-                                    placeholder="Opcional..." />
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Observación</label>
+                                <input id="inputObs" type="text" maxlength="200" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Opcional..." />
                             </div>
                         </div>
                         <div class="flex justify-end mt-4">
-                            <button type="submit" id="btnRegistrar"
-                                class="h-11 px-8 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2">
+                            <button type="submit" id="btnRegistrar" class="h-11 px-8 bg-accent-orange text-white font-bold rounded-lg hover:brightness-110 transition-all flex items-center gap-2">
                                 <span class="material-symbols-outlined text-lg">save</span> Registrar Atraso
                             </button>
                         </div>
                     </form>
+
+                    <!-- Formulario Ingreso Masivo Mensual -->
+                    <div id="formMasivo" class="p-6 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pb-6 border-b border-slate-100">
+                            <div class="space-y-1 md:col-span-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Funcionario</label>
+                                <select id="masivoPersonal" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                                    <option value="">— Seleccionar —</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Mes</label>
+                                <select id="masivoMes" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"></select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Año</label>
+                                <select id="masivoAnio" class="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-lg text-sm"></select>
+                            </div>
+                        </div>
+                        
+                        <div id="masivoBuscando" class="hidden p-8 flex flex-col items-center justify-center text-slate-400">
+                            <span class="material-symbols-outlined text-4xl animate-spin mb-2">progress_activity</span>
+                            <span class="text-sm">Cargando mes...</span>
+                        </div>
+
+                        <div id="masivoNotificacion" class="hidden p-8 text-center">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 mb-2">person_search</span>
+                            <p class="text-sm text-slate-500 font-medium">Selecciona un funcionario para cargar su calendario de atrasos.</p>
+                        </div>
+
+                        <div id="masivoGridContainer" class="hidden mt-6">
+                            <div class="flex justify-between items-end mb-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-800">Calendario de Atrasos (Minutos)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Si un día no tiene atraso, deja la casilla vacía.</p>
+                                </div>
+                            </div>
+                            <div id="calendarioGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+                                <!-- Generado por JS -->
+                            </div>
+                            <div class="flex justify-end border-t border-slate-100 pt-5">
+                                <button id="btnGuardarMasivo" onclick="guardarMasivo()" class="h-11 px-8 bg-primary text-white font-bold rounded-lg hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                                    <span class="material-symbols-outlined text-lg">cloud_sync</span> Guardar Todo el Mes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ═══ FILTROS PARA LISTADO ═══ -->
@@ -246,10 +290,15 @@
                             <h4 class="text-base font-bold text-slate-900">Listado de Atrasos</h4>
                             <p id="atrasosCount" class="text-xs text-slate-400 mt-1"></p>
                         </div>
-                        <button id="btnImprimir"
-                            class="no-print h-10 px-5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all flex items-center gap-2 text-sm">
-                            <span class="material-symbols-outlined text-lg">print</span> Imprimir
-                        </button>
+                        <div class="flex items-center gap-3 no-print">
+                            <button id="btnDescargarPdf" class="hidden items-center gap-2 px-5 py-2.5 bg-accent-orange text-white rounded-xl text-sm font-bold shadow-lg shadow-accent-orange/20 hover:brightness-110 transition-all">
+                                <span class="material-symbols-outlined text-lg">picture_as_pdf</span> Descargar PDF
+                            </button>
+                            <button id="btnImprimir" onclick="window.print()"
+                                class="h-10 px-5 bg-slate-100 text-slate-700 font-bold rounded-lg hover:bg-slate-200 transition-all flex items-center gap-2 text-sm">
+                                <span class="material-symbols-outlined text-lg">print</span> Imprimir
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
@@ -367,18 +416,24 @@
             const currentYear = now.getFullYear();
 
             // Populate month selectors
-            document.getElementById('filterMes').innerHTML = MESES.map((m, i) =>
+            const monthOpts = MESES.map((m, i) =>
                 `<option value="${i + 1}" ${i + 1 === currentMonth ? 'selected' : ''}>${m}</option>`
             ).join('');
+            document.getElementById('filterMes').innerHTML = monthOpts;
+            const msMes = document.getElementById('masivoMes');
+            if(msMes) msMes.innerHTML = monthOpts;
 
             // Populate year selectors
             const filterAnio = document.getElementById('filterAnio');
-            for (let y = 2020; y <= currentYear + 1; y++) {
+            const msAnio = document.getElementById('masivoAnio');
+            const baseYear = Math.max(2026, currentYear - 5); // Por seguridad, asegurarse que no parta antes del 2026
+            for (let y = 2026; y <= currentYear + 1; y++) {
                 const opt = document.createElement('option');
                 opt.value = y;
                 opt.textContent = y;
                 if (y === currentYear) opt.selected = true;
                 filterAnio.appendChild(opt);
+                if (msAnio) msAnio.appendChild(opt.cloneNode(true));
             }
 
             // Set default date
@@ -389,6 +444,17 @@
 
             // Load initial data
             loadAtrasos();
+
+            const btnPdf = document.getElementById('btnDescargarPdf');
+            if (btnPdf) {
+                btnPdf.addEventListener('click', () => {
+                    const personalId = document.getElementById('filterPersonal').value;
+                    if (!personalId) return;
+                    const mes = document.getElementById('filterMes').value;
+                    const anio = document.getElementById('filterAnio').value;
+                    window.open(`${API}/api/reportes/pdf/${personalId}?mes=${mes}&anio=${anio}`, '_blank');
+                });
+            }
         });
 
         async function loadPersonal() {
@@ -398,6 +464,8 @@
                 const options = list.map(p => `<option value="${p.id}">${p.apellidos.toUpperCase()} ${p.nombre.toUpperCase()} — ${p.run}</option>`).join('');
                 document.getElementById('selectPersonal').innerHTML = '<option value="">— Seleccionar —</option>' + options;
                 document.getElementById('filterPersonal').innerHTML = '<option value="">— Todos —</option>' + options;
+                const msPers = document.getElementById('masivoPersonal');
+                if (msPers) msPers.innerHTML = '<option value="">— Seleccionar —</option>' + options;
             } catch (e) {
                 console.error('Error cargando personal:', e);
             }
@@ -461,12 +529,18 @@
                     document.getElementById('valPromedio').textContent = data.promedioMinutos;
                     resumenCards.classList.remove('hidden');
                     resumenCards.classList.add('grid');
+                    
+                    document.getElementById('btnDescargarPdf').classList.remove('hidden');
+                    document.getElementById('btnDescargarPdf').classList.add('flex');
 
                     renderTable(data.atrasos || []);
                 } else {
                     // All employees
                     resumenCards.classList.add('hidden');
                     resumenCards.classList.remove('grid');
+                    
+                    document.getElementById('btnDescargarPdf').classList.add('hidden');
+                    document.getElementById('btnDescargarPdf').classList.remove('flex');
 
                     const res = await fetch(`${API}/api/atrasos?mes=${mes}&anio=${anio}`);
                     const data = await res.json();
@@ -610,6 +684,259 @@
         document.getElementById('edit-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeEditModal();
         });
+
+        // ═══ PESTAÑAS (TABS) ═══
+        function switchTab(tabId) {
+            const btnDiario = document.getElementById('tab-diario');
+            const btnMasivo = document.getElementById('tab-masivo');
+            const iconDiario = btnDiario.querySelector('.tab-icon');
+            const iconMasivo = btnMasivo.querySelector('.tab-icon');
+            
+            if (tabId === 'diario') {
+                document.getElementById('formAtraso').classList.remove('hidden');
+                document.getElementById('formMasivo').classList.add('hidden');
+                
+                btnDiario.className = "flex-1 py-4 text-white font-bold bg-primary border-b-4 border-accent-orange transition-colors flex items-center justify-center gap-2";
+                iconDiario.classList.replace('text-slate-400', 'text-accent-orange');
+                btnMasivo.className = "flex-1 py-4 text-slate-400 font-medium bg-slate-900 border-b-4 border-transparent hover:text-white transition-colors flex items-center justify-center gap-2";
+                iconMasivo.classList.replace('text-accent-orange', 'text-slate-400');
+            } else {
+                document.getElementById('formAtraso').classList.add('hidden');
+                document.getElementById('formMasivo').classList.remove('hidden');
+                
+                btnMasivo.className = "flex-1 py-4 text-white font-bold bg-primary border-b-4 border-accent-orange transition-colors flex items-center justify-center gap-2";
+                iconMasivo.classList.replace('text-slate-400', 'text-accent-orange');
+                btnDiario.className = "flex-1 py-4 text-slate-400 font-medium bg-slate-900 border-b-4 border-transparent hover:text-white transition-colors flex items-center justify-center gap-2";
+                iconDiario.classList.replace('text-accent-orange', 'text-slate-400');
+                
+                if(!document.getElementById('masivoPersonal').value) {
+                    document.getElementById('masivoNotificacion').classList.remove('hidden');
+                    document.getElementById('masivoGridContainer').classList.add('hidden');
+                }
+            }
+        }
+
+        // ═══ CARGA MASIVA ═══
+        ['masivoPersonal', 'masivoMes', 'masivoAnio'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', (e) => {
+                loadCalendarioMasivo();
+                if (id === 'masivoMes') {
+                    document.getElementById('filterMes').value = e.target.value;
+                } else if (id === 'masivoAnio') {
+                    document.getElementById('filterAnio').value = e.target.value;
+                }
+                if (id === 'masivoPersonal') {
+                    document.getElementById('filterPersonal').value = e.target.value;
+                }
+                loadAtrasos();
+            });
+        });
+
+        let masivoAtrasosActuales = {};
+        let cacheFeriados = {};
+
+        async function fetchFeriados(anio) {
+            if (cacheFeriados[anio]) return cacheFeriados[anio];
+            try {
+                // date.nager.at is a free public holiday API
+                const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anio}/CL`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const feriados = {};
+                    data.forEach(f => {
+                        if (f.global) feriados[f.date] = f.localName;
+                    });
+                    
+                    // Feriados institucionales de nuestra BBDD
+                    try {
+                        const custRes = await fetch(`/api/feriados-institucionales?anio=${anio}`);
+                        if (custRes.ok) {
+                            const custData = await custRes.json();
+                            custData.forEach(cf => {
+                                feriados[cf.fecha] = cf.descripcion;
+                            });
+                        }
+                    } catch (e) {
+                        console.warn('No se pudieron obtener feriados institucionales', e);
+                    }
+
+                    cacheFeriados[anio] = feriados;
+                    return feriados;
+                }
+            } catch (err) {
+                console.warn('No se pudieron obtener feriados:', err);
+            }
+            cacheFeriados[anio] = {};
+            return {};
+        }
+
+        async function loadCalendarioMasivo() {
+            const pId = document.getElementById('masivoPersonal').value;
+            const mes = document.getElementById('masivoMes').value;
+            const anio = document.getElementById('masivoAnio').value;
+            
+            const gridContainer = document.getElementById('masivoGridContainer');
+            const notificacion = document.getElementById('masivoNotificacion');
+            const buscando = document.getElementById('masivoBuscando');
+            const grid = document.getElementById('calendarioGrid');
+
+            if (!pId || !mes || !anio) {
+                gridContainer.classList.add('hidden');
+                notificacion.classList.remove('hidden');
+                return;
+            }
+
+            notificacion.classList.add('hidden');
+            gridContainer.classList.add('hidden');
+            buscando.classList.remove('hidden');
+            grid.innerHTML = '';
+            masivoAtrasosActuales = {};
+
+            try {
+                // Obtener feriados primero
+                await fetchFeriados(anio);
+
+                const res = await fetch(`${API}/api/atrasos/resumen/${pId}?mes=${mes}&anio=${anio}`);
+                const data = await res.json();
+                
+                if (data.atrasos) {
+                    data.atrasos.forEach(a => {
+                        masivoAtrasosActuales[a.fecha] = a; 
+                    });
+                }
+                
+                renderCalendarioGrid(parseInt(mes), parseInt(anio));
+                gridContainer.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudieron cargar los datos previos.'});
+                notificacion.classList.remove('hidden');
+            } finally {
+                buscando.classList.add('hidden');
+            }
+        }
+
+        function renderCalendarioGrid(mes, anio) {
+            const grid = document.getElementById('calendarioGrid');
+            const diasEnMes = new Date(anio, mes, 0).getDate();
+            const strMes = mes.toString().padStart(2, '0');
+            const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const feriados = cacheFeriados[anio] || {};
+            
+            let html = '';
+            for (let dia = 1; dia <= diasEnMes; dia++) {
+                const strDia = dia.toString().padStart(2, '0');
+                const fechaISO = `${anio}-${strMes}-${strDia}`;
+                const diaIdx = new Date(anio, mes - 1, dia).getDay();
+                const nombreDia = diasSemana[diaIdx];
+                
+                const esFeriado = feriados[fechaISO];
+                const esFinSemana = (diaIdx === 0 || diaIdx === 6);
+                const isBlocked = esFeriado || esFinSemana;
+                
+                const atrasoPrevio = masivoAtrasosActuales[fechaISO] || null;
+                const valorActual = atrasoPrevio ? atrasoPrevio.minutosAtraso : '';
+                const atrasoId = atrasoPrevio ? atrasoPrevio.id : '';
+                
+                let bgClass = 'bg-emerald-50 border-emerald-100 hover:border-accent-orange/50';
+                let txtDiaClass = 'text-slate-600';
+                let bloqueoTxt = '';
+                
+                if (esFeriado) {
+                    bgClass = 'bg-rose-50 border-rose-200 opacity-90';
+                    txtDiaClass = 'text-rose-700';
+                    bloqueoTxt = `<div class="text-[10px] text-rose-600 font-bold px-1 mt-1 leading-tight text-center truncate" title="${esFeriado}">${esFeriado}</div>`;
+                } else if (esFinSemana) {
+                    bgClass = 'bg-rose-50 border-rose-200 opacity-90';
+                    txtDiaClass = 'text-rose-700';
+                    bloqueoTxt = `<div class="text-[10px] text-rose-600 font-bold px-1 mt-1 leading-tight text-center">FDS</div>`;
+                }
+                
+                const labelIcon = atrasoPrevio ? '<span class="flex h-2 w-2 relative"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-orange opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-accent-orange"></span></span>' : '';
+                
+                const inputHtml = isBlocked 
+                    ? `<div class="w-full h-10 flex items-center justify-center">${bloqueoTxt}</div><input type="hidden" class="masivo-input" data-fecha="${fechaISO}" data-id="${atrasoId}" data-original="${valorActual}" value="${valorActual}">`
+                    : `<input type="number" min="0" max="480" value="${valorActual}" data-fecha="${fechaISO}" data-id="${atrasoId}" data-original="${valorActual}" class="masivo-input w-full h-10 px-2 text-center bg-white border border-slate-200 rounded-md text-sm font-bold text-slate-800 focus:border-accent-orange focus:ring-1 focus:ring-accent-orange" placeholder="-" />`;
+                
+                html += `
+                    <div class="border rounded-lg p-3 flex flex-col justify-between transition-colors ${bgClass}">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold ${txtDiaClass} uppercase tracking-wider">${nombreDia} ${dia}</span>
+                            ${labelIcon}
+                        </div>
+                        ${inputHtml}
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+        }
+
+        async function guardarMasivo() {
+            const pId = parseInt(document.getElementById('masivoPersonal').value);
+            if (!pId) return;
+
+            const btn = document.getElementById('btnGuardarMasivo');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Guardando...';
+
+            const inputs = document.querySelectorAll('.masivo-input');
+            const promises = [];
+
+            inputs.forEach(input => {
+                const fecha = input.dataset.fecha;
+                const originalVal = input.dataset.original;
+                const currentVal = input.value;
+                const id = input.dataset.id;
+                
+                const originalMin = originalVal === '' ? 0 : parseInt(originalVal);
+                const currentMin = currentVal === '' ? 0 : parseInt(currentVal);
+
+                if (originalMin !== currentMin) {
+                    if (originalMin === 0 && currentMin > 0) {
+                        promises.push(
+                            fetch(`${API}/api/atrasos`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ personalId: pId, fecha: fecha, minutosAtraso: currentMin, observacion: null })
+                            })
+                        );
+                    } else if (originalMin > 0 && currentMin === 0) {
+                        promises.push(
+                            fetch(`${API}/api/atrasos/${id}`, { method: 'DELETE' })
+                        );
+                    } else if (originalMin > 0 && currentMin > 0 && originalMin !== currentMin) {
+                        promises.push(
+                            fetch(`${API}/api/atrasos/${id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ minutosAtraso: currentMin, observacion: null })
+                            })
+                        );
+                    }
+                }
+            });
+
+            if (promises.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Sin cambios', text: 'No se modificó ningún atraso.', confirmButtonColor: '#f97316' });
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-lg">cloud_sync</span> Guardar Todo el Mes';
+                return;
+            }
+
+            try {
+                await Promise.all(promises);
+                Swal.fire({ icon: 'success', title: '¡Guardado!', text: `Se actualizaron los registros correctamente.`, confirmButtonColor: '#f97316', timer: 2000 });
+                // Recargar listados 
+                loadAtrasos();
+                loadCalendarioMasivo();
+            } catch (err) {
+                Swal.fire({ icon: 'warning', title: 'Aviso', text: 'Hubo algunos errores al guardar. Comprueba la tabla.', confirmButtonColor: '#f97316' });
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-lg">cloud_sync</span> Guardar Todo el Mes';
+            }
+        }
 
         // Print
         document.getElementById('btnImprimir').addEventListener('click', () => window.print());

@@ -17,8 +17,8 @@ import java.util.Map;
 @RequestMapping("/api/reemplazos")
 @RequiredArgsConstructor
 public class ReemplazoController {
-
     private final ReemplazoService reemplazoService;
+    private final cl.acropolis.reemplazos.repository.AtrasoRepository atrasoRepository;
 
     @GetMapping
     public List<Reemplazo> listarTodos() {
@@ -104,9 +104,14 @@ public class ReemplazoController {
         BalanceMensualDTO balance = reemplazoService.calcularBalanceIndividual(personalId, mes, anio);
         List<Reemplazo> movimientos = reemplazoService.obtenerMovimientosIndividuales(personalId, mes, anio);
 
+        LocalDate inicio = LocalDate.of(anio, mes, 1);
+        LocalDate fin = inicio.withDayOfMonth(inicio.lengthOfMonth());
+        List<cl.acropolis.reemplazos.model.Atraso> atrasos = atrasoRepository.findByPersonalIdAndFechaBetweenOrderByFechaDesc(personalId, inicio, fin);
+
         Map<String, Object> result = new HashMap<>();
         result.put("balance", balance);
         result.put("movimientos", movimientos);
+        result.put("atrasos", atrasos);
         return result;
     }
 }

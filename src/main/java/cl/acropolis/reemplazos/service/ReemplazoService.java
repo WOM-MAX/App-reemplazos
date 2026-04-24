@@ -7,6 +7,7 @@ import cl.acropolis.reemplazos.model.Personal;
 import cl.acropolis.reemplazos.model.Reemplazo;
 import cl.acropolis.reemplazos.repository.PersonalRepository;
 import cl.acropolis.reemplazos.repository.ReemplazoRepository;
+import cl.acropolis.reemplazos.repository.AtrasoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ public class ReemplazoService {
 
     private final ReemplazoRepository reemplazoRepository;
     private final PersonalRepository personalRepository;
+    private final AtrasoRepository atrasoRepository;
 
     /**
      * Registra un nuevo reemplazo.
@@ -122,6 +124,7 @@ public class ReemplazoService {
         return todosPersonal.stream().map(persona -> {
             Integer totalAusente = reemplazoRepository.sumMinutosComoAusente(persona.getId(), mes, anio);
             Integer totalReemplazante = reemplazoRepository.sumMinutosComoReemplazante(persona.getId(), mes, anio);
+            Integer totalAtraso = atrasoRepository.sumMinutosByPersonalAndMes(persona.getId(), mes, anio);
             Integer balance = (totalReemplazante - totalAusente) - persona.getMinutosContratoReemplazo();
 
             return BalanceMensualDTO.builder()
@@ -133,6 +136,7 @@ public class ReemplazoService {
                     .minutosContratoReemplazo(persona.getMinutosContratoReemplazo())
                     .totalMinutosAusente(totalAusente)
                     .totalMinutosReemplazante(totalReemplazante)
+                    .totalMinutosAtraso(totalAtraso)
                     .balance(balance)
                     .build();
         }).collect(Collectors.toList());
@@ -147,6 +151,7 @@ public class ReemplazoService {
 
         Integer totalAusente = reemplazoRepository.sumMinutosComoAusente(personalId, mes, anio);
         Integer totalReemplazante = reemplazoRepository.sumMinutosComoReemplazante(personalId, mes, anio);
+        Integer totalAtraso = atrasoRepository.sumMinutosByPersonalAndMes(personalId, mes, anio);
         Integer balance = (totalReemplazante - totalAusente) - persona.getMinutosContratoReemplazo();
 
         return BalanceMensualDTO.builder()
@@ -158,6 +163,7 @@ public class ReemplazoService {
                 .minutosContratoReemplazo(persona.getMinutosContratoReemplazo())
                 .totalMinutosAusente(totalAusente)
                 .totalMinutosReemplazante(totalReemplazante)
+                .totalMinutosAtraso(totalAtraso)
                 .balance(balance)
                 .build();
     }

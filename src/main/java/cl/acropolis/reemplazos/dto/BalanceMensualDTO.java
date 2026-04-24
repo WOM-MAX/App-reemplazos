@@ -18,5 +18,6 @@ public class BalanceMensualDTO {
     private Integer minutosContratoReemplazo;
     private Integer totalMinutosAusente; // Deuda: suma minutos donde fue ausente
     private Integer totalMinutosReemplazante; // Favor: suma minutos donde fue reemplazante
+    private Integer totalMinutosAtraso; // Deuda adicional: suma minutos de atrasos
     private Integer balance; // (Favor - Deuda) - ContratoReemplazo
 }

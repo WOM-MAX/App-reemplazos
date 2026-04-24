@@ -1,9 +1,10 @@
 package cl.acropolis.reemplazos.service;
 
 import cl.acropolis.reemplazos.dto.BalanceMensualDTO;
-
 import cl.acropolis.reemplazos.model.Reemplazo;
+import cl.acropolis.reemplazos.model.Atraso;
 import cl.acropolis.reemplazos.repository.ReemplazoRepository;
+import cl.acropolis.reemplazos.repository.AtrasoRepository;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class PdfReportService {
 
         private final ReemplazoService reemplazoService;
         private final ReemplazoRepository reemplazoRepository;
+        private final AtrasoRepository atrasoRepository;
 
         // Colores del diseño Stitch
         private static final BaseColor PRIMARY = new BaseColor(15, 23, 41); // #0f1729
@@ -36,6 +38,10 @@ public class PdfReportService {
                                 .filter(r -> r.getDocenteAusente().getId().equals(personalId)
                                                 || r.getReemplazante().getId().equals(personalId))
                                 .toList();
+
+                LocalDate inicio = LocalDate.of(anio, mes, 1);
+                LocalDate fin = inicio.withDayOfMonth(inicio.lengthOfMonth());
+                List<Atraso> atrasos = atrasoRepository.findByPersonalIdAndFechaBetweenOrderByFechaDesc(personalId, inicio, fin);
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Document document = new Document(PageSize.LETTER, 40, 40, 50, 50);
@@ -90,9 +96,9 @@ public class PdfReportService {
                 document.add(new Paragraph(" "));
 
                 // === RESUMEN ===
-                PdfPTable balanceTable = new PdfPTable(3);
+                PdfPTable balanceTable = new PdfPTable(4);
                 balanceTable.setWidthPercentage(100);
-                balanceTable.setWidths(new float[] { 1, 1, 1 });
+                balanceTable.setWidths(new float[] { 1, 1, 1, 1 });
 
                 addBalanceCell(balanceTable, "Min. Contrato", String.valueOf(balance.getMinutosContratoReemplazo()),
                                 headerFont,
@@ -101,6 +107,9 @@ public class PdfReportService {
                                 headerFont, orangeFont);
                 addBalanceCell(balanceTable, "Min. Reemplazante",
                                 String.valueOf(balance.getTotalMinutosReemplazante()),
+                                headerFont, orangeFont);
+                addBalanceCell(balanceTable, "Min. Atraso",
+                                String.valueOf(balance.getTotalMinutosAtraso()),
                                 headerFont, orangeFont);
 
                 document.add(balanceTable);
@@ -127,26 +136,47 @@ public class PdfReportService {
                 // Filas de detalle
                 DateTimeFormatter dateFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                 boolean alt = false;
+                
+                // Unificar y ordenar movimientos
+                record MovimientoPDF(LocalDate fecha, String hora, String rol, BaseColor colorRol, String curso, String asignatura, int minutos) {}
+                java.util.List<MovimientoPDF> todos = new java.util.ArrayList<>();
+                
                 for (Reemplazo r : detalles) {
-                        BaseColor rowColor = alt ? LIGHT_GRAY : BaseColor.WHITE;
                         String rol = r.getDocenteAusente().getId().equals(personalId) ? "AUSENTE" : "REEMPLAZANTE";
-                        Font rolFont = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD,
-                                        rol.equals("AUSENTE") ? new BaseColor(220, 38, 38)
-                                                        : new BaseColor(22, 163, 74));
+                        BaseColor color = rol.equals("AUSENTE") ? new BaseColor(220, 38, 38) : new BaseColor(22, 163, 74);
+                        todos.add(new MovimientoPDF(
+                            r.getFecha(), 
+                            r.getHoraInicio() != null ? r.getHoraInicio().toString() : "—",
+                            rol, color,
+                            r.getCurso() != null ? r.getCurso() : "—",
+                            r.getAsignatura() != null ? r.getAsignatura() : "—",
+                            r.getMinutosReemplazo()
+                        ));
+                }
+                
+                for (Atraso a : atrasos) {
+                        todos.add(new MovimientoPDF(
+                            a.getFecha(), "—", "ATRASO", new BaseColor(249, 115, 22), "—", "—", a.getMinutosAtraso()
+                        ));
+                }
+                
+                // Ordenar por fecha (descendente como en el frontend usualmente, o ascendente)
+                todos.sort((m1, m2) -> m2.fecha().compareTo(m1.fecha()));
 
-                        addDetailCell(detailTable, r.getFecha().format(dateFmt), cellFont, rowColor);
-                        addDetailCell(detailTable, r.getHoraInicio() != null ? r.getHoraInicio().toString() : "—",
-                                        cellFont,
-                                        rowColor);
-                        addDetailCell(detailTable, rol, rolFont, rowColor);
-                        addDetailCell(detailTable, r.getCurso() != null ? r.getCurso() : "—", cellFont, rowColor);
-                        addDetailCell(detailTable, r.getAsignatura() != null ? r.getAsignatura() : "—", cellFont,
-                                        rowColor);
-                        addDetailCell(detailTable, String.valueOf(r.getMinutosReemplazo()), cellFont, rowColor);
+                for (MovimientoPDF m : todos) {
+                        BaseColor rowColor = alt ? LIGHT_GRAY : BaseColor.WHITE;
+                        Font rolFont = new Font(Font.FontFamily.HELVETICA, 9, Font.BOLD, m.colorRol());
+
+                        addDetailCell(detailTable, m.fecha().format(dateFmt), cellFont, rowColor);
+                        addDetailCell(detailTable, m.hora(), cellFont, rowColor);
+                        addDetailCell(detailTable, m.rol(), rolFont, rowColor);
+                        addDetailCell(detailTable, m.curso(), cellFont, rowColor);
+                        addDetailCell(detailTable, m.asignatura(), cellFont, rowColor);
+                        addDetailCell(detailTable, String.valueOf(m.minutos()), cellFont, rowColor);
                         alt = !alt;
                 }
 
-                if (detalles.isEmpty()) {
+                if (todos.isEmpty()) {
                         PdfPCell emptyCell = new PdfPCell(new Phrase("Sin movimientos en este período", cellFont));
                         emptyCell.setColspan(6);
                         emptyCell.setPadding(15);
