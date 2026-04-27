@@ -32,7 +32,7 @@ USER appuser
 # Puerto interno de Spring Boot
 EXPOSE 8080
 
-# Variables JVM optimizadas para BAJO CONSUMO (Max 128MB)
-ENV JAVA_OPTS="-XX:+UseContainerSupport -Xms64m -Xmx128m -XX:MaxMetaspaceSize=64m -Xss256k -XX:CICompilerCount=2 -Djava.security.egd=file:/dev/./urandom"
+# Variables JVM súper optimizadas para contenedores de baja memoria (ej. Railway 200MB)
+ENV JAVA_OPTS="-Xmx100m -Xms50m -XX:MaxMetaspaceSize=80m -Xss256k -XX:+UseSerialGC -Djava.security.egd=file:/dev/./urandom"
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
