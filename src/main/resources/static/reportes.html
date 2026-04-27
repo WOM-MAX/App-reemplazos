@@ -650,11 +650,19 @@
             headerRow.innerHTML = `
                 <div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">Balance General del Personal</h3>
-                    <p class="text-sm text-slate-500">Período: ${periodoText}</p>
+                    <p class="text-sm text-slate-500">Período: ${periodoText} — ${data.length} funcionarios</p>
                 </div>
-                <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors no-print shrink-0">
-                    <span class="material-symbols-outlined text-lg">print</span> Imprimir Reporte
-                </button>
+                <div class="flex items-center gap-3 no-print flex-wrap">
+                    <button onclick="descargarExcel()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 hover:brightness-110 transition-all">
+                        <span class="material-symbols-outlined text-lg">table_chart</span> Excel
+                    </button>
+                    <button onclick="enviarBalanceMasivo()" class="flex items-center gap-2 px-5 py-2.5 bg-accent-orange text-white rounded-xl text-sm font-bold shadow-lg shadow-accent-orange/20 hover:brightness-110 transition-all">
+                        <span class="material-symbols-outlined text-lg">forward_to_inbox</span> Enviar a Todos
+                    </button>
+                    <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors shrink-0">
+                        <span class="material-symbols-outlined text-lg">print</span> Imprimir
+                    </button>
+                </div>
             `;
             reporteGeneralContent.appendChild(headerRow);
 
@@ -958,6 +966,89 @@
         document.getElementById('edit-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeEditModal();
         });
+
+        // === Excel Download ===
+        function descargarExcel() {
+            const mes = selectMes.value;
+            const anio = selectAnio.value;
+            window.open(`${API_BASE}/api/reportes/excel?mes=${mes}&anio=${anio}`, '_blank');
+        }
+
+        // === Mass Email Sending ===
+        async function enviarBalanceMasivo() {
+            const mes = selectMes.value;
+            const anio = selectAnio.value;
+            const periodoText = `${MESES[parseInt(mes) - 1]} ${anio}`;
+
+            const confirm = await Swal.fire({
+                title: '¿Enviar Balance a Todos?',
+                html: `<div class="text-left text-sm text-slate-600">
+                    <p class="mb-3">Se enviará por correo electrónico el reporte PDF del período <strong>${periodoText}</strong> a <strong>todos los funcionarios</strong> que tengan email institucional registrado.</p>
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
+                        <p class="text-amber-800 text-xs"><strong>⚠ Importante:</strong> Este proceso puede tomar varios minutos. No cierre esta ventana hasta que finalice.</p>
+                    </div>
+                </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, Enviar a Todos',
+                cancelButtonText: 'Cancelar',
+                customClass: { popup: 'rounded-2xl' }
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Enviando reportes...',
+                html: '<p class="text-sm text-slate-500">Generando PDFs y enviando correos a cada funcionario. Por favor espere...</p>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/reportes/enviar-masivo?mes=${mes}&anio=${anio}`, { method: 'POST' });
+                const data = await res.json();
+
+                if (res.ok) {
+                    let resumenHtml = `
+                        <div class="text-left space-y-3">
+                            <div class="grid grid-cols-2 gap-3 text-center">
+                                <div class="bg-emerald-50 p-3 rounded-xl">
+                                    <p class="text-2xl font-black text-emerald-600">${data.enviados}</p>
+                                    <p class="text-xs text-emerald-700 font-medium">Enviados</p>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl">
+                                    <p class="text-2xl font-black text-slate-600">${data.sinEmail}</p>
+                                    <p class="text-xs text-slate-500 font-medium">Sin Email</p>
+                                </div>
+                            </div>`;
+
+                    if (data.fallidos > 0) {
+                        resumenHtml += `
+                            <div class="bg-red-50 p-3 rounded-xl text-center">
+                                <p class="text-2xl font-black text-red-600">${data.fallidos}</p>
+                                <p class="text-xs text-red-600 font-medium">Fallidos</p>
+                            </div>`;
+                    }
+                    resumenHtml += `<p class="text-xs text-slate-400 text-center mt-2">Total de funcionarios: ${data.total}</p></div>`;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Envío Completado!',
+                        html: resumenHtml,
+                        confirmButtonColor: '#f97316',
+                        customClass: { popup: 'rounded-2xl' }
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Error en el envío masivo.', confirmButtonColor: '#f97316' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#f97316' });
+            }
+        }
     </script>
 </body>
 

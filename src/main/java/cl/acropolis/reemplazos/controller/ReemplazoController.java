@@ -89,6 +89,20 @@ public class ReemplazoController {
     }
 
     /**
+     * Estadísticas agrupadas por día de la semana (para gráfico del Dashboard).
+     */
+    @GetMapping("/estadisticas-diarias")
+    public List<java.util.Map<String, Object>> estadisticasDiarias(
+            @RequestParam(defaultValue = "0") int mes,
+            @RequestParam(defaultValue = "0") int anio) {
+        if (mes == 0)
+            mes = LocalDate.now().getMonthValue();
+        if (anio == 0)
+            anio = LocalDate.now().getYear();
+        return reemplazoService.obtenerEstadisticasDiarias(mes, anio);
+    }
+
+    /**
      * Movimientos individuales de un funcionario en un mes/año + balance.
      */
     @GetMapping("/movimientos/{personalId}")

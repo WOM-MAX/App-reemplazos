@@ -211,4 +211,35 @@ public class ReemplazoService {
     public List<Reemplazo> obtenerActividadReciente() {
         return reemplazoRepository.findTop10ByOrderByFechaDescHoraInicioDesc();
     }
+
+    /**
+     * Estadísticas agrupadas por día de la semana para el gráfico del Dashboard.
+     * Retorna totales de ausencias y reemplazos por cada día (Lunes a Viernes).
+     */
+    public List<java.util.Map<String, Object>> obtenerEstadisticasDiarias(int mes, int anio) {
+        List<Reemplazo> reemplazos = reemplazoRepository.findByMesYAnio(mes, anio);
+
+        String[] diasNombres = {"LUN", "MAR", "MIÉ", "JUE", "VIE"};
+        int[] totalAusencias = new int[5];
+        int[] totalReemplazos = new int[5];
+
+        for (Reemplazo r : reemplazos) {
+            int dayOfWeek = r.getFecha().getDayOfWeek().getValue(); // 1=Monday ... 5=Friday
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                int idx = dayOfWeek - 1;
+                totalAusencias[idx] += r.getMinutosReemplazo();
+                totalReemplazos[idx] += r.getMinutosReemplazo();
+            }
+        }
+
+        List<java.util.Map<String, Object>> resultado = new java.util.ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            java.util.Map<String, Object> dia = new java.util.LinkedHashMap<>();
+            dia.put("dia", diasNombres[i]);
+            dia.put("ausencias", totalAusencias[i]);
+            dia.put("reemplazos", totalReemplazos[i]);
+            resultado.add(dia);
+        }
+        return resultado;
+    }
 }
