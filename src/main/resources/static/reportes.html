@@ -173,6 +173,16 @@
             <!-- Content Area -->
             <div class="p-8 space-y-8 bg-slate-50 dark:bg-background-dark min-h-full print-area">
 
+                <!-- Tabs -->
+                <div class="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-px no-print">
+                    <button id="tab-individual" class="px-4 py-3 font-bold text-sm border-b-2 border-accent-orange text-accent-orange transition-colors">
+                        Reporte Individual
+                    </button>
+                    <button id="tab-general" class="px-4 py-3 font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                        Reporte General
+                    </button>
+                </div>
+
                 <!-- Print-only header -->
                 <div class="print-header hidden items-center justify-between mb-6">
                     <div>
@@ -189,7 +199,7 @@
                 <div
                     class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 no-print">
                     <div class="flex flex-col md:flex-row items-end gap-4">
-                        <div class="flex-1 min-w-0">
+                        <div id="filtro-funcionario" class="flex-1 min-w-0">
                             <label
                                 class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Funcionario</label>
                             <select id="selectPersonal"
@@ -388,6 +398,10 @@
 
                 </div>
 
+                <!-- General Report Content -->
+                <div id="reporteGeneralContent" class="hidden space-y-6">
+                </div>
+
             </div>
         </main>
     </div>
@@ -472,6 +486,12 @@
         const btnConsultar = document.getElementById('btnConsultar');
         const emptyState = document.getElementById('emptyState');
         const reportContent = document.getElementById('reportContent');
+        const tabIndividual = document.getElementById('tab-individual');
+        const tabGeneral = document.getElementById('tab-general');
+        const filtroFuncionario = document.getElementById('filtro-funcionario');
+        const reporteGeneralContent = document.getElementById('reporteGeneralContent');
+
+        let currentTab = 'individual'; // 'individual' or 'general'
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -521,6 +541,53 @@
             } catch (e) { }
         });
 
+        // Tab Switching Logic
+        tabIndividual.addEventListener('click', () => {
+            currentTab = 'individual';
+            tabIndividual.classList.replace('border-transparent', 'border-accent-orange');
+            tabIndividual.classList.replace('text-slate-500', 'text-accent-orange');
+            tabGeneral.classList.replace('border-accent-orange', 'border-transparent');
+            tabGeneral.classList.replace('text-accent-orange', 'text-slate-500');
+            
+            filtroFuncionario.classList.remove('hidden');
+            reporteGeneralContent.classList.add('hidden');
+            
+            if (selectPersonal.value) {
+                reportContent.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            } else {
+                reportContent.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = `
+                    <div class="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                        <span class="material-symbols-outlined text-4xl text-slate-300">person_search</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-400">Seleccione un funcionario</h3>
+                    <p class="text-sm text-slate-400 mt-1">Elija un funcionario y período para ver su reporte de movimientos.</p>
+                `;
+            }
+        });
+
+        tabGeneral.addEventListener('click', () => {
+            currentTab = 'general';
+            tabGeneral.classList.replace('border-transparent', 'border-accent-orange');
+            tabGeneral.classList.replace('text-slate-500', 'text-accent-orange');
+            tabIndividual.classList.replace('border-accent-orange', 'border-transparent');
+            tabIndividual.classList.replace('text-accent-orange', 'text-slate-500');
+            
+            filtroFuncionario.classList.add('hidden');
+            reportContent.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = `
+                <div class="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-4xl text-slate-300">groups</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-400">Reporte de Todo el Personal</h3>
+                <p class="text-sm text-slate-400 mt-1">Haga clic en Consultar para ver el balance mensual de todos los funcionarios.</p>
+            `;
+            reporteGeneralContent.classList.add('hidden');
+        });
+
         // Consult button
         btnConsultar.addEventListener('click', loadReport);
 
@@ -530,9 +597,6 @@
         });
 
         async function loadReport() {
-            const personalId = selectPersonal.value;
-            if (!personalId) return;
-
             const mes = selectMes.value;
             const anio = selectAnio.value;
 
@@ -540,14 +604,28 @@
             btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Cargando...';
 
             try {
-                const response = await fetch(`${API_BASE}/api/reemplazos/movimientos/${personalId}?mes=${mes}&anio=${anio}`);
-                const data = await response.json();
-
-                movimientosCache = data.movimientos || [];
-                renderReport(data, personalId, parseInt(mes), parseInt(anio));
-
-                emptyState.classList.add('hidden');
-                reportContent.classList.remove('hidden');
+                if (currentTab === 'individual') {
+                    const personalId = selectPersonal.value;
+                    if (!personalId) {
+                        btnConsultar.disabled = false;
+                        btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg">search</span> Consultar';
+                        return;
+                    }
+                    const response = await fetch(`${API_BASE}/api/reemplazos/movimientos/${personalId}?mes=${mes}&anio=${anio}`);
+                    const data = await response.json();
+                    movimientosCache = data.movimientos || [];
+                    renderReport(data, personalId, parseInt(mes), parseInt(anio));
+                    emptyState.classList.add('hidden');
+                    reportContent.classList.remove('hidden');
+                    reporteGeneralContent.classList.add('hidden');
+                } else {
+                    const response = await fetch(`${API_BASE}/api/reemplazos/calculo-mensual?mes=${mes}&anio=${anio}`);
+                    const data = await response.json();
+                    renderGeneralReport(data, parseInt(mes), parseInt(anio));
+                    emptyState.classList.add('hidden');
+                    reportContent.classList.add('hidden');
+                    reporteGeneralContent.classList.remove('hidden');
+                }
             } catch (e) {
                 console.error('Error cargando reporte:', e);
                 alert('Error al cargar el reporte. Verifique que el servidor esté en funcionamiento.');
@@ -555,6 +633,99 @@
                 btnConsultar.disabled = false;
                 btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg">search</span> Consultar';
             }
+        }
+
+        function renderGeneralReport(data, mes, anio) {
+            reporteGeneralContent.innerHTML = '';
+            
+            const periodoText = `${MESES[mes - 1]} ${anio}`;
+
+            // Header for print
+            document.getElementById('print-periodo').textContent = `Período: ${periodoText}`;
+            document.getElementById('print-fecha').textContent = `Generado: ${new Date().toLocaleDateString('es-CL')} (General)`;
+
+            // Controles superiores
+            const headerRow = document.createElement('div');
+            headerRow.className = 'flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800';
+            headerRow.innerHTML = `
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Balance General del Personal</h3>
+                    <p class="text-sm text-slate-500">Período: ${periodoText}</p>
+                </div>
+                <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors no-print shrink-0">
+                    <span class="material-symbols-outlined text-lg">print</span> Imprimir Reporte
+                </button>
+            `;
+            reporteGeneralContent.appendChild(headerRow);
+
+            const grid = document.createElement('div');
+            grid.className = 'space-y-4';
+            
+            // Ordenar por nombre alfabéticamente
+            data.sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto));
+
+            data.forEach(balance => {
+                const initials = balance.nombreCompleto.split(' ').map(w => w[0]).join('').substring(0, 2);
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 hover:border-slate-200 dark:hover:border-slate-700 transition-colors balance-card';
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 min-w-[300px]">
+                        <div class="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center font-black text-primary text-lg shrink-0">
+                            ${initials}
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight">${balance.nombreCompleto}</h4>
+                            <p class="text-xs text-slate-500 mt-1">${balance.cargo || 'Funcionario'} • ${balance.run}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 w-full xl:w-auto">
+                        <!-- Min Contrato -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">MIN. CONTRATO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-primary dark:text-white">${balance.minutosContratoReemplazo || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-blue-500/20">description</span>
+                        </div>
+                        
+                        <!-- Min Reemplazo -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. REEMPLAZO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-emerald-500">${balance.totalMinutosReemplazante || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-emerald-500/20">swap_horiz</span>
+                        </div>
+                        
+                        <!-- Min Ausencia -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. AUSENCIA</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-rose-500">${balance.totalMinutosAusente || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-rose-500/20">person_off</span>
+                        </div>
+                        
+                        <!-- Min Atraso -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. ATRASO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-amber-500">${balance.totalMinutosAtraso || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-amber-500/20">timer</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            reporteGeneralContent.appendChild(grid);
         }
 
         function renderReport(data, personalId, mes, anio) {
