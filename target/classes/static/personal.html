@@ -74,8 +74,11 @@
                     href="atrasos.html">
                     <span class="material-symbols-outlined">schedule</span><span class="font-medium">Atrasos</span>
                 </a>
-                <a id="nav-usuarios"
-                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="feriados.html">
+                    <span class="material-symbols-outlined">event_busy</span><span class="font-medium">Feriados Escolares</span>
+                </a>
+                <a id="nav-usuarios" class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
                     href="usuarios.html">
                     <span class="material-symbols-outlined">manage_accounts</span><span
                         class="font-medium">Usuarios</span>
@@ -173,9 +176,10 @@
                             class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm" required />
                     </div>
                     <div><label class="text-xs font-bold text-slate-500 uppercase">Cargo</label>
-                        <input id="edit-cargo"
-                            class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm"
-                            value="Docente" />
+                        <select id="edit-cargo" class="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-lg text-sm">
+                            <option value="Docente">Docente</option>
+                            <option value="Asistente de la Educación">Asistente de la Educación</option>
+                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">

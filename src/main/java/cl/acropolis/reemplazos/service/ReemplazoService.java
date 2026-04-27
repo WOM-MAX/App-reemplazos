@@ -169,6 +169,33 @@ public class ReemplazoService {
     }
 
     /**
+     * Tendencia de los últimos 6 meses de un funcionario (para gráfico de línea).
+     */
+    public List<java.util.Map<String, Object>> calcularTendenciaIndividual(Long personalId, int mes, int anio) {
+        List<java.util.Map<String, Object>> tendencia = new java.util.ArrayList<>();
+        String[] meses = {"", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDate fecha = LocalDate.of(anio, mes, 1).minusMonths(i);
+            int m = fecha.getMonthValue();
+            int a = fecha.getYear();
+
+            Integer totalAusente = reemplazoRepository.sumMinutosComoAusente(personalId, m, a);
+            Integer totalReemplazante = reemplazoRepository.sumMinutosComoReemplazante(personalId, m, a);
+            Integer totalAtraso = atrasoRepository.sumMinutosByPersonalAndMes(personalId, m, a);
+
+            java.util.Map<String, Object> punto = new java.util.LinkedHashMap<>();
+            punto.put("mes", meses[m] + " " + a);
+            punto.put("reemplazo", totalReemplazante);
+            punto.put("ausencia", totalAusente);
+            punto.put("atraso", totalAtraso);
+            punto.put("balance", totalReemplazante - totalAusente);
+            tendencia.add(punto);
+        }
+        return tendencia;
+    }
+
+    /**
      * Estadísticas para el Dashboard.
      */
     public DashboardStatsDTO obtenerEstadisticasDashboard() {
@@ -213,32 +240,28 @@ public class ReemplazoService {
     }
 
     /**
-     * Estadísticas agrupadas por día de la semana para el gráfico del Dashboard.
-     * Retorna totales de ausencias y reemplazos por cada día (Lunes a Viernes).
+     * Tendencia mensual para el gráfico del Dashboard.
+     * Retorna totales de ausencias y reemplazos de los últimos 6 meses.
      */
-    public List<java.util.Map<String, Object>> obtenerEstadisticasDiarias(int mes, int anio) {
-        List<Reemplazo> reemplazos = reemplazoRepository.findByMesYAnio(mes, anio);
-
-        String[] diasNombres = {"LUN", "MAR", "MIÉ", "JUE", "VIE"};
-        int[] totalAusencias = new int[5];
-        int[] totalReemplazos = new int[5];
-
-        for (Reemplazo r : reemplazos) {
-            int dayOfWeek = r.getFecha().getDayOfWeek().getValue(); // 1=Monday ... 5=Friday
-            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-                int idx = dayOfWeek - 1;
-                totalAusencias[idx] += r.getMinutosReemplazo();
-                totalReemplazos[idx] += r.getMinutosReemplazo();
-            }
-        }
+    public List<java.util.Map<String, Object>> obtenerTendenciaMensualGlobal() {
+        String[] mesesNombres = {"", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"};
+        LocalDate hoy = LocalDate.now();
 
         List<java.util.Map<String, Object>> resultado = new java.util.ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            java.util.Map<String, Object> dia = new java.util.LinkedHashMap<>();
-            dia.put("dia", diasNombres[i]);
-            dia.put("ausencias", totalAusencias[i]);
-            dia.put("reemplazos", totalReemplazos[i]);
-            resultado.add(dia);
+
+        for (int i = 5; i >= 0; i--) {
+            LocalDate fecha = hoy.minusMonths(i).withDayOfMonth(1);
+            int m = fecha.getMonthValue();
+            int a = fecha.getYear();
+
+            Integer totalMinutosAusencia = reemplazoRepository.sumMinutosMes(m, a);
+            Long totalReemplazos = reemplazoRepository.countByMesYAnio(m, a);
+
+            java.util.Map<String, Object> punto = new java.util.LinkedHashMap<>();
+            punto.put("mes", mesesNombres[m] + " " + a);
+            punto.put("minutosAusencia", totalMinutosAusencia != null ? totalMinutosAusencia : 0);
+            punto.put("cantidadReemplazos", totalReemplazos != null ? totalReemplazos : 0);
+            resultado.add(punto);
         }
         return resultado;
     }

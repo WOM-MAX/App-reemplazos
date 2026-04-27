@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
         rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -66,6 +67,12 @@
         .animate-in {
             animation: fadeInUp 0.4s ease-out forwards;
         }
+
+        @media print {
+            aside, header, .no-print { display: none !important; }
+            main { margin: 0; padding: 0; }
+            .print-break { page-break-before: always; }
+        }
     </style>
 </head>
 
@@ -108,8 +115,11 @@
                     <span class="material-symbols-outlined">schedule</span>
                     <span class="font-medium">Atrasos</span>
                 </a>
-                <a id="nav-usuarios"
-                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="feriados.html">
+                    <span class="material-symbols-outlined">event_busy</span><span class="font-medium">Feriados Escolares</span>
+                </a>
+                <a id="nav-usuarios" class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
                     href="usuarios.html">
                     <span class="material-symbols-outlined">manage_accounts</span>
                     <span class="font-medium">Usuarios</span>
@@ -221,20 +231,22 @@
                 <div class="flex flex-col lg:flex-row gap-6">
                     <!-- Chart Section -->
                     <div class="lg:w-[60%] bg-white p-8 rounded-xl shadow-xl border border-slate-100">
-                        <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center justify-between mb-4">
                             <div>
-                                <h4 class="text-lg font-bold text-slate-900">Ausencias vs Reemplazos</h4>
-                                <p class="text-slate-400 text-sm">Registro de los últimos 7 días lectivos</p>
+                                <h4 class="text-lg font-bold text-slate-900">Tendencia Últimos 6 Meses</h4>
+                                <p class="text-slate-400 text-sm">Minutos totales y cantidad de reemplazos por mes</p>
                             </div>
-                            <div class="flex items-center gap-4 text-xs">
-                                <div class="flex items-center gap-1"><span class="h-3 w-3 bg-primary rounded"></span>
-                                    Ausencias</div>
-                                <div class="flex items-center gap-1"><span
-                                        class="h-3 w-3 bg-accent-orange rounded"></span> Reemplazos</div>
+                            <div class="flex items-center gap-2 no-print">
+                                <button onclick="descargarGrafico('chartBarras', 'Tendencia_6_Meses')" class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-600 transition-colors" title="Descargar como imagen">
+                                    <span class="material-symbols-outlined text-base">download</span> PNG
+                                </button>
+                                <button onclick="window.print()" class="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold text-slate-600 transition-colors" title="Imprimir Dashboard">
+                                    <span class="material-symbols-outlined text-base">print</span>
+                                </button>
                             </div>
                         </div>
-                        <div id="chart-container" class="relative h-[300px] flex items-end justify-between gap-4 px-2">
-                            <!-- Chart bars populated by JS -->
+                        <div class="relative h-[300px]">
+                            <canvas id="chartBarras"></canvas>
                         </div>
                     </div>
                     <!-- Recent Activity -->
@@ -251,22 +263,38 @@
                         </div>
                     </div>
                 </div>
-                <!-- Footer Stats -->
-                <div
-                    class="bg-primary rounded-xl p-8 text-white flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
-                        <h4 class="text-xl font-bold">Estado del Personal</h4>
-                        <p class="text-slate-400 text-sm mt-1" id="footer-info">Cargando información...</p>
+                <!-- Alerts Section -->
+                <div id="alertas-section" class="hidden">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-accent-orange text-2xl">warning</span>
+                        <h4 class="text-lg font-bold text-slate-900">Alertas del Mes</h4>
                     </div>
-                    <div class="flex items-center gap-8">
-                        <div class="text-center">
-                            <p class="text-xs text-slate-400 uppercase tracking-widest">Total</p>
-                            <p id="footer-total" class="text-2xl font-bold">—</p>
+                    <div id="alertas-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </div>
+
+                <!-- Doughnut Chart -->
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="lg:w-1/3 bg-white p-8 rounded-xl shadow-xl border border-slate-100">
+                        <h4 class="text-lg font-bold text-slate-900 mb-4">Favor vs Deuda</h4>
+                        <div class="relative h-[250px] flex items-center justify-center">
+                            <canvas id="chartDoughnut"></canvas>
                         </div>
-                        <div class="text-center border-l border-slate-700 pl-8">
-                            <a href="formulario.html"
-                                class="bg-accent-orange px-6 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all inline-block">+
-                                Nuevo Reemplazo</a>
+                    </div>
+                    <div class="lg:w-2/3 bg-primary rounded-xl p-8 text-white flex flex-col justify-center gap-6">
+                        <div>
+                            <h4 class="text-xl font-bold">Estado del Personal</h4>
+                            <p class="text-slate-400 text-sm mt-1" id="footer-info">Cargando información...</p>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="text-center">
+                                <p class="text-xs text-slate-400 uppercase tracking-widest">Total</p>
+                                <p id="footer-total" class="text-2xl font-bold">—</p>
+                            </div>
+                            <div class="text-center border-l border-slate-700 pl-8">
+                                <a href="formulario.html"
+                                    class="bg-accent-orange px-6 py-2 rounded-lg font-bold text-sm hover:brightness-110 transition-all inline-block">+
+                                    Nuevo Reemplazo</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -368,8 +396,12 @@
                 // Activity Feed
                 renderActivityFeed(recent);
 
-                // Chart (static illustration since we don't have daily data endpoint)
+                // Charts
                 renderChart();
+                renderDoughnut(stats.totalMinutosFavor || 0, stats.totalMinutosDeuda || 0);
+
+                // Alertas
+                loadAlertas();
             } catch (err) {
                 console.error('Error loading dashboard:', err);
             }
@@ -415,25 +447,131 @@
             }).join('');
         }
 
-        function renderChart() {
-            const container = document.getElementById('chart-container');
-            const days = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
-            const ausencias = [160, 180, 120, 200, 150, 40, 20];
-            const reemplazos = [140, 170, 120, 190, 140, 40, 20];
-            const maxH = 200;
+        let chartBarrasInstance = null;
+        let chartDoughnutInstance = null;
 
-            container.innerHTML = days.map((day, i) => {
-                const h1 = ausencias[i];
-                const h2 = reemplazos[i];
-                return `
-        <div class="flex flex-col items-center gap-2 flex-1 group">
-            <div class="w-full flex justify-center items-end gap-1 h-[200px]">
-                <div class="w-full bg-primary/20 rounded-t-md transition-all duration-500" style="height: ${h1}px"></div>
-                <div class="w-full bg-accent-orange rounded-t-md transition-all duration-500" style="height: ${h2}px"></div>
-            </div>
-            <span class="text-xs font-bold text-slate-500">${day}</span>
-        </div>`;
-            }).join('');
+        async function renderChart() {
+            try {
+                const res = await fetch(`${API}/api/reemplazos/tendencia-mensual`);
+                const data = await res.json();
+                const labels = data.map(d => d.mes);
+                const minutos = data.map(d => d.minutosAusencia);
+                const cantidad = data.map(d => d.cantidadReemplazos);
+
+                const ctx = document.getElementById('chartBarras').getContext('2d');
+                if (chartBarrasInstance) chartBarrasInstance.destroy();
+                chartBarrasInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Total Minutos',
+                                data: minutos,
+                                backgroundColor: 'rgba(15, 23, 41, 0.75)',
+                                borderRadius: 6,
+                                barPercentage: 0.5,
+                                yAxisID: 'y',
+                                order: 2
+                            },
+                            {
+                                type: 'line',
+                                label: 'N° Reemplazos',
+                                data: cantidad,
+                                borderColor: '#f97316',
+                                backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 5,
+                                pointBackgroundColor: '#f97316',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                borderWidth: 3,
+                                yAxisID: 'y1',
+                                order: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: { position: 'top', labels: { font: { family: 'Inter', weight: '600', size: 11 }, usePointStyle: true, pointStyle: 'rectRounded' } }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, position: 'left', title: { display: true, text: 'Minutos', font: { family: 'Inter', size: 10, weight: '600' } }, ticks: { font: { family: 'Inter', size: 10 } }, grid: { color: '#f1f5f9' } },
+                            y1: { beginAtZero: true, position: 'right', title: { display: true, text: 'Reemplazos', font: { family: 'Inter', size: 10, weight: '600' } }, ticks: { font: { family: 'Inter', size: 10 } }, grid: { drawOnChartArea: false } },
+                            x: { ticks: { font: { family: 'Inter', weight: '700', size: 10 } }, grid: { display: false } }
+                        }
+                    }
+                });
+            } catch (e) { console.error('Error cargando gráfico:', e); }
+        }
+
+        function renderDoughnut(favor, deuda) {
+            const ctx = document.getElementById('chartDoughnut').getContext('2d');
+            if (chartDoughnutInstance) chartDoughnutInstance.destroy();
+            chartDoughnutInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Min. a Favor', 'Min. Deuda'],
+                    datasets: [{
+                        data: [favor, deuda],
+                        backgroundColor: ['rgba(22, 163, 74, 0.8)', 'rgba(220, 38, 38, 0.8)'],
+                        borderWidth: 0,
+                        spacing: 4,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', weight: '600', size: 11 }, usePointStyle: true, pointStyle: 'rectRounded', padding: 20 } }
+                    }
+                }
+            });
+        }
+
+        async function loadAlertas() {
+            try {
+                const res = await fetch(`${API}/api/reemplazos/calculo-mensual`);
+                const data = await res.json();
+
+                const alertas = data.filter(b => (b.balance !== null && b.balance !== undefined) && (b.balance < -90 || b.balance > 180));
+
+                const section = document.getElementById('alertas-section');
+                const container = document.getElementById('alertas-container');
+
+                if (alertas.length === 0) {
+                    section.classList.add('hidden');
+                    return;
+                }
+
+                section.classList.remove('hidden');
+                container.innerHTML = alertas.map(a => {
+                    const isDeuda = a.balance < 0;
+                    const color = isDeuda ? 'red' : 'emerald';
+                    const icon = isDeuda ? 'trending_down' : 'trending_up';
+                    const label = isDeuda ? 'Deuda alta' : 'Se le deben minutos';
+                    return `
+                        <div class="bg-white p-4 rounded-xl border border-${color}-200 shadow-sm flex items-center gap-4 animate-in">
+                            <div class="h-10 w-10 bg-${color}-100 rounded-full flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-${color}-600">${icon}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-slate-900 truncate">${a.nombreCompleto}</p>
+                                <p class="text-xs text-slate-500">${a.cargo || 'Funcionario'}</p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <p class="text-lg font-black text-${color}-600">${a.balance} min</p>
+                                <p class="text-[10px] font-bold text-${color}-500 uppercase">${label}</p>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (e) { console.error('Error cargando alertas:', e); }
         }
 
         /* ── Edit & Delete ── */
@@ -556,6 +694,16 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => { loadDashboard(); initAuth(); });
+
+        // Download chart as PNG image
+        function descargarGrafico(canvasId, nombre) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const link = document.createElement('a');
+            link.download = nombre + '_' + new Date().toISOString().slice(0, 10) + '.png';
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
     </script>
 </body>
 

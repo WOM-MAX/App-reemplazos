@@ -6,6 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Reportes — Colegio Acrópolis</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
@@ -122,8 +123,11 @@
                     <span class="material-symbols-outlined">schedule</span>
                     <span class="font-medium">Atrasos</span>
                 </a>
-                <a id="nav-usuarios"
-                    class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                <a class="flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
+                    href="feriados.html">
+                    <span class="material-symbols-outlined">event_busy</span><span class="font-medium">Feriados Escolares</span>
+                </a>
+                <a id="nav-usuarios" class="hidden items-center gap-3 px-4 py-3 text-slate-300 hover:bg-slate-800 rounded-xl transition-all duration-200"
                     href="usuarios.html">
                     <span class="material-symbols-outlined">manage_accounts</span>
                     <span class="font-medium">Usuarios</span>
@@ -170,6 +174,16 @@
             <!-- Content Area -->
             <div class="p-8 space-y-8 bg-slate-50 dark:bg-background-dark min-h-full print-area">
 
+                <!-- Tabs -->
+                <div class="flex items-center gap-4 border-b border-slate-200 dark:border-slate-800 pb-px no-print">
+                    <button id="tab-individual" class="px-4 py-3 font-bold text-sm border-b-2 border-accent-orange text-accent-orange transition-colors">
+                        Reporte Individual
+                    </button>
+                    <button id="tab-general" class="px-4 py-3 font-bold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                        Reporte General
+                    </button>
+                </div>
+
                 <!-- Print-only header -->
                 <div class="print-header hidden items-center justify-between mb-6">
                     <div>
@@ -186,7 +200,7 @@
                 <div
                     class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 no-print">
                     <div class="flex flex-col md:flex-row items-end gap-4">
-                        <div class="flex-1 min-w-0">
+                        <div id="filtro-funcionario" class="flex-1 min-w-0">
                             <label
                                 class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Funcionario</label>
                             <select id="selectPersonal"
@@ -273,7 +287,7 @@
                     </div>
 
                     <!-- Balance Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Min. Contrato -->
                         <div
                             class="balance-card bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
@@ -308,6 +322,36 @@
                             </div>
                             <div class="absolute -top-2 -right-2 bg-rose-500/10 p-4 rounded-full text-rose-500">
                                 <span class="material-symbols-outlined text-3xl">person_off</span>
+                            </div>
+                        </div>
+                        <!-- Σ Min. Atraso -->
+                        <div
+                            class="balance-card bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Σ Min. Atraso</p>
+                            <div class="flex items-baseline gap-2 mt-2">
+                                <span id="valAtraso" class="text-3xl font-black text-amber-500">0</span>
+                                <span class="text-sm text-slate-400">min</span>
+                            </div>
+                            <div class="absolute -top-2 -right-2 bg-amber-500/10 p-4 rounded-full text-amber-500">
+                                <span class="material-symbols-outlined text-3xl">timer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <!-- Doughnut Chart -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Distribución del Mes</h4>
+                            <div class="relative h-[200px] flex items-center justify-center">
+                                <canvas id="individualDoughnut"></canvas>
+                            </div>
+                        </div>
+                        <!-- Line/Bar Trend Chart -->
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Tendencia Últimos 6 Meses</h4>
+                            <div class="relative h-[200px]">
+                                <canvas id="individualTrend"></canvas>
                             </div>
                         </div>
                     </div>
@@ -359,19 +403,7 @@
                                 </thead>
                                 <tbody id="movimientosBody" class="divide-y divide-slate-100 dark:divide-slate-700">
                                 </tbody>
-                                <tfoot>
-                                    <tr
-                                        class="bg-slate-50 dark:bg-slate-800 border-t-2 border-slate-200 dark:border-slate-600">
-                                        <td colspan="6"
-                                            class="px-5 py-4 text-sm font-black text-slate-700 dark:text-slate-200 uppercase">
-                                            Totales del Período</td>
-                                        <td class="px-5 py-4 text-right">
-                                            <span id="totalMinutos"
-                                                class="text-sm font-black text-primary dark:text-white"></span>
-                                        </td>
-                                        <td class="no-print"></td>
-                                    </tr>
-                                </tfoot>
+
                             </table>
                         </div>
                         <!-- Empty movements message -->
@@ -383,6 +415,10 @@
                     </div>
 
 
+                </div>
+
+                <!-- General Report Content -->
+                <div id="reporteGeneralContent" class="hidden space-y-6">
                 </div>
 
             </div>
@@ -469,6 +505,12 @@
         const btnConsultar = document.getElementById('btnConsultar');
         const emptyState = document.getElementById('emptyState');
         const reportContent = document.getElementById('reportContent');
+        const tabIndividual = document.getElementById('tab-individual');
+        const tabGeneral = document.getElementById('tab-general');
+        const filtroFuncionario = document.getElementById('filtro-funcionario');
+        const reporteGeneralContent = document.getElementById('reporteGeneralContent');
+
+        let currentTab = 'individual'; // 'individual' or 'general'
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -518,6 +560,53 @@
             } catch (e) { }
         });
 
+        // Tab Switching Logic
+        tabIndividual.addEventListener('click', () => {
+            currentTab = 'individual';
+            tabIndividual.classList.replace('border-transparent', 'border-accent-orange');
+            tabIndividual.classList.replace('text-slate-500', 'text-accent-orange');
+            tabGeneral.classList.replace('border-accent-orange', 'border-transparent');
+            tabGeneral.classList.replace('text-accent-orange', 'text-slate-500');
+            
+            filtroFuncionario.classList.remove('hidden');
+            reporteGeneralContent.classList.add('hidden');
+            
+            if (selectPersonal.value) {
+                reportContent.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            } else {
+                reportContent.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                emptyState.innerHTML = `
+                    <div class="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                        <span class="material-symbols-outlined text-4xl text-slate-300">person_search</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-400">Seleccione un funcionario</h3>
+                    <p class="text-sm text-slate-400 mt-1">Elija un funcionario y período para ver su reporte de movimientos.</p>
+                `;
+            }
+        });
+
+        tabGeneral.addEventListener('click', () => {
+            currentTab = 'general';
+            tabGeneral.classList.replace('border-transparent', 'border-accent-orange');
+            tabGeneral.classList.replace('text-slate-500', 'text-accent-orange');
+            tabIndividual.classList.replace('border-accent-orange', 'border-transparent');
+            tabIndividual.classList.replace('text-accent-orange', 'text-slate-500');
+            
+            filtroFuncionario.classList.add('hidden');
+            reportContent.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            emptyState.innerHTML = `
+                <div class="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-4xl text-slate-300">groups</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-400">Reporte de Todo el Personal</h3>
+                <p class="text-sm text-slate-400 mt-1">Haga clic en Consultar para ver el balance mensual de todos los funcionarios.</p>
+            `;
+            reporteGeneralContent.classList.add('hidden');
+        });
+
         // Consult button
         btnConsultar.addEventListener('click', loadReport);
 
@@ -527,9 +616,6 @@
         });
 
         async function loadReport() {
-            const personalId = selectPersonal.value;
-            if (!personalId) return;
-
             const mes = selectMes.value;
             const anio = selectAnio.value;
 
@@ -537,14 +623,28 @@
             btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg animate-spin">progress_activity</span> Cargando...';
 
             try {
-                const response = await fetch(`${API_BASE}/api/reemplazos/movimientos/${personalId}?mes=${mes}&anio=${anio}`);
-                const data = await response.json();
-
-                movimientosCache = data.movimientos || [];
-                renderReport(data, personalId, parseInt(mes), parseInt(anio));
-
-                emptyState.classList.add('hidden');
-                reportContent.classList.remove('hidden');
+                if (currentTab === 'individual') {
+                    const personalId = selectPersonal.value;
+                    if (!personalId) {
+                        btnConsultar.disabled = false;
+                        btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg">search</span> Consultar';
+                        return;
+                    }
+                    const response = await fetch(`${API_BASE}/api/reemplazos/movimientos/${personalId}?mes=${mes}&anio=${anio}`);
+                    const data = await response.json();
+                    movimientosCache = data.movimientos || [];
+                    renderReport(data, personalId, parseInt(mes), parseInt(anio));
+                    emptyState.classList.add('hidden');
+                    reportContent.classList.remove('hidden');
+                    reporteGeneralContent.classList.add('hidden');
+                } else {
+                    const response = await fetch(`${API_BASE}/api/reemplazos/calculo-mensual?mes=${mes}&anio=${anio}`);
+                    const data = await response.json();
+                    renderGeneralReport(data, parseInt(mes), parseInt(anio));
+                    emptyState.classList.add('hidden');
+                    reportContent.classList.add('hidden');
+                    reporteGeneralContent.classList.remove('hidden');
+                }
             } catch (e) {
                 console.error('Error cargando reporte:', e);
                 alert('Error al cargar el reporte. Verifique que el servidor esté en funcionamiento.');
@@ -552,6 +652,230 @@
                 btnConsultar.disabled = false;
                 btnConsultar.innerHTML = '<span class="material-symbols-outlined text-lg">search</span> Consultar';
             }
+        }
+
+        function renderGeneralReport(data, mes, anio) {
+            reporteGeneralContent.innerHTML = '';
+            
+            const periodoText = `${MESES[mes - 1]} ${anio}`;
+
+            // Header for print
+            document.getElementById('print-periodo').textContent = `Período: ${periodoText}`;
+            document.getElementById('print-fecha').textContent = `Generado: ${new Date().toLocaleDateString('es-CL')} (General)`;
+
+            // Controles superiores
+            const headerRow = document.createElement('div');
+            headerRow.className = 'flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800';
+            headerRow.innerHTML = `
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Balance General del Personal</h3>
+                    <p class="text-sm text-slate-500">Período: ${periodoText} — ${data.length} funcionarios</p>
+                </div>
+                <div class="flex items-center gap-3 no-print flex-wrap">
+                    <button onclick="descargarExcel()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-600/20 hover:brightness-110 transition-all">
+                        <span class="material-symbols-outlined text-lg">table_chart</span> Excel
+                    </button>
+                    <button onclick="enviarBalanceMasivo()" class="flex items-center gap-2 px-5 py-2.5 bg-accent-orange text-white rounded-xl text-sm font-bold shadow-lg shadow-accent-orange/20 hover:brightness-110 transition-all">
+                        <span class="material-symbols-outlined text-lg">forward_to_inbox</span> Enviar a Todos
+                    </button>
+                    <button onclick="window.print()" class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors shrink-0">
+                        <span class="material-symbols-outlined text-lg">print</span> Imprimir
+                    </button>
+                </div>
+            `;
+            reporteGeneralContent.appendChild(headerRow);
+
+            const grid = document.createElement('div');
+            grid.className = 'space-y-4';
+            
+            // Ordenar por nombre alfabéticamente
+            data.sort((a, b) => a.nombreCompleto.localeCompare(b.nombreCompleto));
+
+            data.forEach(balance => {
+                const initials = balance.nombreCompleto.split(' ').map(w => w[0]).join('').substring(0, 2);
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6 hover:border-slate-200 dark:hover:border-slate-700 transition-colors balance-card';
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 min-w-[300px]">
+                        <div class="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center font-black text-primary text-lg shrink-0">
+                            ${initials}
+                        </div>
+                        <div>
+                            <h4 class="text-base font-bold text-slate-900 dark:text-white leading-tight">${balance.nombreCompleto}</h4>
+                            <p class="text-xs text-slate-500 mt-1">${balance.cargo || 'Funcionario'} • ${balance.run}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-4 w-full xl:w-auto">
+                        <!-- Min Contrato -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">MIN. CONTRATO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-primary dark:text-white">${balance.minutosContratoReemplazo || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-blue-500/20">description</span>
+                        </div>
+                        
+                        <!-- Min Reemplazo -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. REEMPLAZO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-emerald-500">${balance.totalMinutosReemplazante || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-emerald-500/20">swap_horiz</span>
+                        </div>
+                        
+                        <!-- Min Ausencia -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. AUSENCIA</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-rose-500">${balance.totalMinutosAusente || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-rose-500/20">person_off</span>
+                        </div>
+                        
+                        <!-- Min Atraso -->
+                        <div class="flex-1 min-w-[140px] bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Σ MIN. ATRASO</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-amber-500">${balance.totalMinutosAtraso || 0}</span>
+                                <span class="text-xs font-medium text-slate-400">min</span>
+                            </div>
+                            <span class="material-symbols-outlined absolute top-3 right-3 text-2xl text-amber-500/20">timer</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            reporteGeneralContent.appendChild(grid);
+        }
+
+        // === Individual Employee Charts ===
+        let indDoughnutInstance = null;
+        let indTrendInstance = null;
+
+        function renderIndividualDoughnut(reemplazo, ausencia, atraso) {
+            const canvas = document.getElementById('individualDoughnut');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (indDoughnutInstance) indDoughnutInstance.destroy();
+
+            indDoughnutInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reemplazo', 'Ausencia', 'Atraso'],
+                    datasets: [{
+                        data: [reemplazo, ausencia, atraso],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(244, 63, 94, 0.85)',
+                            'rgba(245, 158, 11, 0.85)'
+                        ],
+                        borderWidth: 0,
+                        spacing: 3,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Inter', weight: '600', size: 10 },
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                padding: 12
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderIndividualTrend(tendencia) {
+            const canvas = document.getElementById('individualTrend');
+            if (!canvas || !tendencia) return;
+            const ctx = canvas.getContext('2d');
+            if (indTrendInstance) indTrendInstance.destroy();
+
+            const labels = tendencia.map(t => t.mes);
+            const reemplazoData = tendencia.map(t => t.reemplazo);
+            const ausenciaData = tendencia.map(t => t.ausencia);
+            const balanceData = tendencia.map(t => t.balance);
+
+            indTrendInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Reemplazo',
+                            data: reemplazoData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderRadius: 4,
+                            barPercentage: 0.5,
+                            order: 2
+                        },
+                        {
+                            label: 'Ausencia',
+                            data: ausenciaData,
+                            backgroundColor: 'rgba(244, 63, 94, 0.7)',
+                            borderRadius: 4,
+                            barPercentage: 0.5,
+                            order: 3
+                        },
+                        {
+                            type: 'line',
+                            label: 'Balance',
+                            data: balanceData,
+                            borderColor: '#f97316',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#f97316',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            borderWidth: 3,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Inter', weight: '600', size: 10 },
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                padding: 10
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Inter', size: 10 } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Inter', weight: '600', size: 9 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
         }
 
         function renderReport(data, personalId, mes, anio) {
@@ -566,11 +890,20 @@
             document.getElementById('employeeCargo').textContent = balance.cargo || 'Sin cargo';
 
             // Balance cards
-            document.getElementById('valContrato').textContent = balance.minutosContratoReemplazo;
-            document.getElementById('valReemplazo').textContent = balance.totalMinutosReemplazante;
-            document.getElementById('valAusencia').textContent = balance.totalMinutosAusente;
+            document.getElementById('valContrato').textContent = balance.minutosContratoReemplazo || 0;
+            document.getElementById('valReemplazo').textContent = balance.totalMinutosReemplazante || 0;
+            document.getElementById('valAusencia').textContent = balance.totalMinutosAusente || 0;
+            document.getElementById('valAtraso').textContent = balance.totalMinutosAtraso || 0;
 
-
+            // Individual Charts
+            renderIndividualDoughnut(
+                balance.totalMinutosReemplazante || 0,
+                balance.totalMinutosAusente || 0,
+                balance.totalMinutosAtraso || 0
+            );
+            if (data.tendencia) {
+                renderIndividualTrend(data.tendencia);
+            }
 
             // Period label
             const periodoText = `${MESES[mes - 1]} ${anio}`;
@@ -582,64 +915,85 @@
             const tbody = document.getElementById('movimientosBody');
             const noMov = document.getElementById('noMovimientos');
             tbody.innerHTML = '';
+            
+            const atrasosArray = data.atrasos || [];
+            
+            const todos = [];
+            movimientos.forEach(m => todos.push({ ...m, _type: 'reemplazo' }));
+            atrasosArray.forEach(a => todos.push({ ...a, _type: 'atraso' }));
+            
+            // Orden descendente por fecha
+            todos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-            if (movimientos.length === 0) {
+            if (todos.length === 0) {
                 noMov.classList.remove('hidden');
                 tbody.parentElement.querySelector('thead').classList.add('hidden');
-                tbody.parentElement.querySelector('tfoot').classList.add('hidden');
                 document.getElementById('movimientosCount').textContent = '0 movimientos';
-                document.getElementById('totalMinutos').textContent = '0 min';
                 return;
             }
 
             noMov.classList.add('hidden');
             tbody.parentElement.querySelector('thead').classList.remove('hidden');
-            tbody.parentElement.querySelector('tfoot').classList.remove('hidden');
-            document.getElementById('movimientosCount').textContent = `${movimientos.length} movimiento${movimientos.length > 1 ? 's' : ''}`;
+            document.getElementById('movimientosCount').textContent = `${todos.length} movimiento${todos.length > 1 ? 's' : ''}`;
 
             let totalMin = 0;
 
-            movimientos.forEach(mov => {
-                const isAusente = mov.docenteAusente.id === pid;
-                const rol = isAusente ? 'AUSENTE' : 'REEMPLAZANTE';
-                const contraparte = isAusente
-                    ? `${mov.reemplazante.apellidos} ${mov.reemplazante.nombre}`
-                    : `${mov.docenteAusente.apellidos} ${mov.docenteAusente.nombre}`;
-
-                totalMin += mov.minutosReemplazo;
-
+            todos.forEach(mov => {
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors';
 
-                row.innerHTML = `
-            <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.horaInicio || '—'}</td>
-            <td class="px-5 py-3.5">
-                <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${isAusente
-                        ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                    }">${rol}</span>
-            </td>
-            <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">${contraparte.toUpperCase()}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.curso || '—'}</td>
-            <td class="px-5 py-3.5 text-sm text-slate-500">${mov.asignatura || '—'}</td>
-            <td class="px-5 py-3.5 text-sm font-bold text-right ${isAusente ? 'text-rose-500' : 'text-emerald-500'}">${mov.minutosReemplazo} min</td>
-            <td class="px-5 py-3.5 text-center no-print">
-                <div class="flex items-center justify-center gap-1">
-                    <button onclick="openEditModal(${mov.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
-                        <span class="material-symbols-outlined text-lg">edit</span>
-                    </button>
-                    <button onclick="deleteReemplazo(${mov.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                    </button>
-                </div>
-            </td>
-        `;
+                if (mov._type === 'reemplazo') {
+                    const isAusente = mov.docenteAusente.id === pid;
+                    const rol = isAusente ? 'AUSENTE' : 'REEMPLAZANTE';
+                    const contraparte = isAusente
+                        ? `${mov.reemplazante.apellidos} ${mov.reemplazante.nombre}`
+                        : `${mov.docenteAusente.apellidos} ${mov.docenteAusente.nombre}`;
 
+                    totalMin += mov.minutosReemplazo;
+
+                    row.innerHTML = `
+                <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.horaInicio || '—'}</td>
+                <td class="px-5 py-3.5">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${isAusente
+                            ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                            : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                        }">${rol}</span>
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">${contraparte.toUpperCase()}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.curso || '—'}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">${mov.asignatura || '—'}</td>
+                <td class="px-5 py-3.5 text-sm font-bold text-right ${isAusente ? 'text-rose-500' : 'text-emerald-500'}">${mov.minutosReemplazo} min</td>
+                <td class="px-5 py-3.5 text-center no-print">
+                    <div class="flex items-center justify-center gap-1">
+                        <button onclick="openEditModal(${mov.id})" class="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all" title="Editar">
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                        <button onclick="deleteReemplazo(${mov.id})" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Eliminar">
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                        </button>
+                    </div>
+                </td>
+            `;
+                } else {
+                    // Atraso
+                    totalMin += mov.minutosAtraso;
+                    row.innerHTML = `
+                <td class="px-5 py-3.5 text-sm font-medium text-slate-700 dark:text-slate-300">${formatDate(mov.fecha)}</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5">
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">ATRASO</span>
+                </td>
+                <td class="px-5 py-3.5 text-sm text-slate-700 dark:text-slate-300">—</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5 text-sm text-slate-500">—</td>
+                <td class="px-5 py-3.5 text-sm font-bold text-right text-amber-500">${mov.minutosAtraso} min</td>
+                <td class="px-5 py-3.5 text-center no-print">
+                </td>
+            `;
+                }
                 tbody.appendChild(row);
             });
-
-            document.getElementById('totalMinutos').textContent = `${totalMin} min`;
         }
 
         function formatDate(dateStr) {
@@ -764,6 +1118,126 @@
         document.getElementById('edit-modal').addEventListener('click', (e) => {
             if (e.target === e.currentTarget) closeEditModal();
         });
+
+        // === Excel Download ===
+        async function descargarExcel() {
+            const mes = selectMes.value;
+            const anio = selectAnio.value;
+
+            Swal.fire({
+                title: 'Generando Excel...',
+                html: '<p class="text-sm text-slate-500">Preparando el archivo, por favor espere...</p>',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/reportes/excel?mes=${mes}&anio=${anio}`);
+                if (!res.ok) {
+                    throw new Error('El servidor no pudo generar el archivo Excel.');
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Balance_General_${mes}_${anio}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Excel Descargado!',
+                    text: 'El archivo se descargó correctamente.',
+                    confirmButtonColor: '#f97316',
+                    timer: 2000
+                });
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al generar Excel',
+                    text: err.message || 'No se pudo conectar con el servidor.',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+        }
+
+        // === Mass Email Sending ===
+        async function enviarBalanceMasivo() {
+            const mes = selectMes.value;
+            const anio = selectAnio.value;
+            const periodoText = `${MESES[parseInt(mes) - 1]} ${anio}`;
+
+            const confirm = await Swal.fire({
+                title: '¿Enviar Balance a Todos?',
+                html: `<div class="text-left text-sm text-slate-600">
+                    <p class="mb-3">Se enviará por correo electrónico el reporte PDF del período <strong>${periodoText}</strong> a <strong>todos los funcionarios</strong> que tengan email institucional registrado.</p>
+                    <div class="bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg">
+                        <p class="text-amber-800 text-xs"><strong>⚠ Importante:</strong> Este proceso puede tomar varios minutos. No cierre esta ventana hasta que finalice.</p>
+                    </div>
+                </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#f97316',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Sí, Enviar a Todos',
+                cancelButtonText: 'Cancelar',
+                customClass: { popup: 'rounded-2xl' }
+            });
+
+            if (!confirm.isConfirmed) return;
+
+            // Show loading
+            Swal.fire({
+                title: 'Enviando reportes...',
+                html: '<p class="text-sm text-slate-500">Generando PDFs y enviando correos a cada funcionario. Por favor espere...</p>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/reportes/enviar-masivo?mes=${mes}&anio=${anio}`, { method: 'POST' });
+                const data = await res.json();
+
+                if (res.ok) {
+                    let resumenHtml = `
+                        <div class="text-left space-y-3">
+                            <div class="grid grid-cols-2 gap-3 text-center">
+                                <div class="bg-emerald-50 p-3 rounded-xl">
+                                    <p class="text-2xl font-black text-emerald-600">${data.enviados}</p>
+                                    <p class="text-xs text-emerald-700 font-medium">Enviados</p>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-xl">
+                                    <p class="text-2xl font-black text-slate-600">${data.sinEmail}</p>
+                                    <p class="text-xs text-slate-500 font-medium">Sin Email</p>
+                                </div>
+                            </div>`;
+
+                    if (data.fallidos > 0) {
+                        resumenHtml += `
+                            <div class="bg-red-50 p-3 rounded-xl text-center">
+                                <p class="text-2xl font-black text-red-600">${data.fallidos}</p>
+                                <p class="text-xs text-red-600 font-medium">Fallidos</p>
+                            </div>`;
+                    }
+                    resumenHtml += `<p class="text-xs text-slate-400 text-center mt-2">Total de funcionarios: ${data.total}</p></div>`;
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Envío Completado!',
+                        html: resumenHtml,
+                        confirmButtonColor: '#f97316',
+                        customClass: { popup: 'rounded-2xl' }
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Error en el envío masivo.', confirmButtonColor: '#f97316' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error de Conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#f97316' });
+            }
+        }
     </script>
 </body>
 

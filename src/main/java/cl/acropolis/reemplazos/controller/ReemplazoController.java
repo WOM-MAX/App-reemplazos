@@ -89,17 +89,11 @@ public class ReemplazoController {
     }
 
     /**
-     * Estadísticas agrupadas por día de la semana (para gráfico del Dashboard).
+     * Tendencia mensual global (últimos 6 meses) para gráfico del Dashboard.
      */
-    @GetMapping("/estadisticas-diarias")
-    public List<java.util.Map<String, Object>> estadisticasDiarias(
-            @RequestParam(defaultValue = "0") int mes,
-            @RequestParam(defaultValue = "0") int anio) {
-        if (mes == 0)
-            mes = LocalDate.now().getMonthValue();
-        if (anio == 0)
-            anio = LocalDate.now().getYear();
-        return reemplazoService.obtenerEstadisticasDiarias(mes, anio);
+    @GetMapping("/tendencia-mensual")
+    public List<java.util.Map<String, Object>> tendenciaMensual() {
+        return reemplazoService.obtenerTendenciaMensualGlobal();
     }
 
     /**
@@ -126,6 +120,7 @@ public class ReemplazoController {
         result.put("balance", balance);
         result.put("movimientos", movimientos);
         result.put("atrasos", atrasos);
+        result.put("tendencia", reemplazoService.calcularTendenciaIndividual(personalId, mes, anio));
         return result;
     }
 }

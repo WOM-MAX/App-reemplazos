@@ -1,4 +1,7 @@
 # Perfil de desarrollo local con H2 (sin PostgreSQL)
+server:
+  port: 3000
+
 spring:
   datasource:
     url: jdbc:h2:mem:reemplazos_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE

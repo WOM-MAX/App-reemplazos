@@ -6,6 +6,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Reportes — Colegio Acrópolis</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
@@ -333,6 +334,24 @@
                             </div>
                             <div class="absolute -top-2 -right-2 bg-amber-500/10 p-4 rounded-full text-amber-500">
                                 <span class="material-symbols-outlined text-3xl">timer</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Charts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <!-- Doughnut Chart -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Distribución del Mes</h4>
+                            <div class="relative h-[200px] flex items-center justify-center">
+                                <canvas id="individualDoughnut"></canvas>
+                            </div>
+                        </div>
+                        <!-- Line/Bar Trend Chart -->
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-900 p-5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <h4 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Tendencia Últimos 6 Meses</h4>
+                            <div class="relative h-[200px]">
+                                <canvas id="individualTrend"></canvas>
                             </div>
                         </div>
                     </div>
@@ -736,6 +755,129 @@
             reporteGeneralContent.appendChild(grid);
         }
 
+        // === Individual Employee Charts ===
+        let indDoughnutInstance = null;
+        let indTrendInstance = null;
+
+        function renderIndividualDoughnut(reemplazo, ausencia, atraso) {
+            const canvas = document.getElementById('individualDoughnut');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (indDoughnutInstance) indDoughnutInstance.destroy();
+
+            indDoughnutInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reemplazo', 'Ausencia', 'Atraso'],
+                    datasets: [{
+                        data: [reemplazo, ausencia, atraso],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(244, 63, 94, 0.85)',
+                            'rgba(245, 158, 11, 0.85)'
+                        ],
+                        borderWidth: 0,
+                        spacing: 3,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Inter', weight: '600', size: 10 },
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                padding: 12
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderIndividualTrend(tendencia) {
+            const canvas = document.getElementById('individualTrend');
+            if (!canvas || !tendencia) return;
+            const ctx = canvas.getContext('2d');
+            if (indTrendInstance) indTrendInstance.destroy();
+
+            const labels = tendencia.map(t => t.mes);
+            const reemplazoData = tendencia.map(t => t.reemplazo);
+            const ausenciaData = tendencia.map(t => t.ausencia);
+            const balanceData = tendencia.map(t => t.balance);
+
+            indTrendInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Reemplazo',
+                            data: reemplazoData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderRadius: 4,
+                            barPercentage: 0.5,
+                            order: 2
+                        },
+                        {
+                            label: 'Ausencia',
+                            data: ausenciaData,
+                            backgroundColor: 'rgba(244, 63, 94, 0.7)',
+                            borderRadius: 4,
+                            barPercentage: 0.5,
+                            order: 3
+                        },
+                        {
+                            type: 'line',
+                            label: 'Balance',
+                            data: balanceData,
+                            borderColor: '#f97316',
+                            backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#f97316',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            borderWidth: 3,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Inter', weight: '600', size: 10 },
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                padding: 10
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Inter', size: 10 } },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Inter', weight: '600', size: 9 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
         function renderReport(data, personalId, mes, anio) {
             const { balance, movimientos } = data;
             const pid = parseInt(personalId);
@@ -752,6 +894,16 @@
             document.getElementById('valReemplazo').textContent = balance.totalMinutosReemplazante || 0;
             document.getElementById('valAusencia').textContent = balance.totalMinutosAusente || 0;
             document.getElementById('valAtraso').textContent = balance.totalMinutosAtraso || 0;
+
+            // Individual Charts
+            renderIndividualDoughnut(
+                balance.totalMinutosReemplazante || 0,
+                balance.totalMinutosAusente || 0,
+                balance.totalMinutosAtraso || 0
+            );
+            if (data.tendencia) {
+                renderIndividualTrend(data.tendencia);
+            }
 
             // Period label
             const periodoText = `${MESES[mes - 1]} ${anio}`;
@@ -968,10 +1120,47 @@
         });
 
         // === Excel Download ===
-        function descargarExcel() {
+        async function descargarExcel() {
             const mes = selectMes.value;
             const anio = selectAnio.value;
-            window.open(`${API_BASE}/api/reportes/excel?mes=${mes}&anio=${anio}`, '_blank');
+
+            Swal.fire({
+                title: 'Generando Excel...',
+                html: '<p class="text-sm text-slate-500">Preparando el archivo, por favor espere...</p>',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/reportes/excel?mes=${mes}&anio=${anio}`);
+                if (!res.ok) {
+                    throw new Error('El servidor no pudo generar el archivo Excel.');
+                }
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Balance_General_${mes}_${anio}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Excel Descargado!',
+                    text: 'El archivo se descargó correctamente.',
+                    confirmButtonColor: '#f97316',
+                    timer: 2000
+                });
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al generar Excel',
+                    text: err.message || 'No se pudo conectar con el servidor.',
+                    confirmButtonColor: '#f97316'
+                });
+            }
         }
 
         // === Mass Email Sending ===
